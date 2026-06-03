@@ -1,0 +1,41 @@
+{% extends 'bookings/wizard/base_wizard.html' %}
+
+{% block wizard_content %}
+<h1 class="font-serif text-3xl text-gray-900 mb-2">Resumen y pago del anticipo</h1>
+<p class="text-gray-500 mb-8">Revisa los detalles y confirma tu reserva con el anticipo del 25%.</p>
+
+{% if total %}
+<div class="bg-rm-dark rounded-2xl p-6 text-white mb-8">
+  <div class="grid md:grid-cols-2 gap-4 text-sm">
+    {% if espacio_obj %}<div><p class="text-gray-400 text-xs uppercase tracking-wider">Espacio</p><p class="font-medium">{{ espacio_obj.nombre }}</p></div>{% endif %}
+    {% if paquete_obj %}<div><p class="text-gray-400 text-xs uppercase tracking-wider">Paquete</p><p class="font-medium">{{ paquete_obj.get_nombre_display }}</p></div>{% endif %}
+    {% if wizard_data.fecha %}<div><p class="text-gray-400 text-xs uppercase tracking-wider">Fecha</p><p class="font-medium">{{ wizard_data.fecha }}</p></div>{% endif %}
+    {% if wizard_data.num_invitados %}<div><p class="text-gray-400 text-xs uppercase tracking-wider">Invitados</p><p class="font-medium">{{ wizard_data.num_invitados }}</p></div>{% endif %}
+  </div>
+  <hr class="border-gray-700 my-4">
+  <div class="flex justify-between text-2xl font-semibold">
+    <span>Total del evento</span>
+    <span>${{ total|floatformat:0 }}</span>
+  </div>
+  <div class="flex justify-between text-sand mt-1">
+    <span class="text-sm">Anticipo a pagar (25%)</span>
+    <span class="text-lg font-semibold">${{ anticipo|floatformat:0 }}</span>
+  </div>
+</div>
+{% endif %}
+
+<form method="post" id="paso-form">
+  {% csrf_token %}
+  <label class="flex items-start gap-3 cursor-pointer">
+    <input type="checkbox" name="aceptar_terminos" required class="w-4 h-4 mt-0.5 accent-[#C9A96E]">
+    <span class="text-sm text-gray-600">Acepto los términos y condiciones. Entiendo que el anticipo del 25% es para reservar la fecha y que el saldo se liquida 15 días antes del evento.</span>
+  </label>
+</form>
+{% endblock %}
+
+{% block wizard_next %}
+  <button type="submit" form="paso-form" class="btn-primary flex items-center gap-2">
+    Confirmar reserva
+    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+  </button>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% comment %}Recibe: paquete, show_cta{% endcomment %}
+<div class="relative card p-6 {% if paquete.es_mas_popular %}border-2 border-sand shadow-md{% endif %}">
+  {% if paquete.es_mas_popular %}
+    <div class="absolute -top-3 left-6">
+      <span class="bg-sand text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Más popular</span>
+    </div>
+  {% endif %}
+  <div class="flex items-center justify-between mb-1">
+    <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest">Paquete</p>
+    <span class="flex items-center gap-1 text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+      <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      {{ paquete.duracion_horas }} horas
+    </span>
+  </div>
+  <h3 class="font-serif text-2xl text-gray-900 mb-2">{{ paquete.get_nombre_display }}</h3>
+  <p class="text-sm text-gray-500 mb-4">{{ paquete.descripcion_corta }}</p>
+  <hr class="border-gray-100 mb-4">
+  <div class="mb-1">
+    <p class="text-xs text-gray-400 uppercase tracking-wider">Desde</p>
+    <p class="text-2xl font-semibold text-gray-900">${{ paquete.precio_por_persona|floatformat:0 }} <span class="text-sm font-normal text-gray-400">/ persona</span></p>
+  </div>
+  <hr class="border-gray-100 my-4">
+  <ul class="space-y-2 mb-6">
+    {% for item in paquete.items.all %}
+      <li class="flex items-start gap-2 text-sm">
+        {% if item.incluido %}
+          <svg class="w-4 h-4 text-teal-rm flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+          <span class="text-gray-700">{{ item.descripcion }}</span>
+        {% else %}
+          <svg class="w-4 h-4 text-gray-300 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          <span class="text-gray-400">{{ item.descripcion }}</span>
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+  {% if show_cta %}
+    <a href="{% url 'bookings:paso_1' %}" class="block text-center {% if paquete.es_mas_popular %}btn-teal{% else %}btn-secondary{% endif %} w-full">
+      Elegir {{ paquete.get_nombre_display }}
+    </a>
+  {% endif %}
+</div>

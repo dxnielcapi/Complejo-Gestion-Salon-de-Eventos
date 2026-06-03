@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Riviera Maya · Salón de Eventos — Donde el Caribe celebra contigo{% endblock %}
+
+{% block content %}
+
+<!-- HERO -->
+<section class="relative bg-rm-dark min-h-[85vh] flex items-center overflow-hidden">
+  <div class="absolute inset-0">
+    <div class="absolute right-0 top-0 w-3/5 h-full bg-sand/30 rounded-bl-[120px]"></div>
+  </div>
+  <div class="relative max-w-7xl mx-auto px-6 py-24">
+    <p class="text-xs font-semibold tracking-widest text-sand uppercase mb-4">Salón de Eventos · Riviera Maya</p>
+    <h1 class="font-serif text-5xl md:text-7xl text-white leading-tight mb-6 max-w-2xl">
+      Donde el Caribe<br>celebra contigo.
+    </h1>
+    <p class="text-gray-300 max-w-md mb-8 leading-relaxed">
+      Bodas, XV años, bautizos y celebraciones inolvidables frente al mar.
+      Cuatro espacios, tres paquetes, una experiencia diseñada para que
+      solo te ocupes de disfrutar.
+    </p>
+    <div class="flex flex-wrap gap-3 mb-12">
+      <a href="{% url 'bookings:paso_1' %}" class="btn-primary flex items-center gap-2">
+        Cotizar mi evento
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+      </a>
+      <a href="{% url 'venues:catalogo' %}" class="btn-secondary text-white border-white/20 hover:bg-white/10">Ver espacios</a>
+    </div>
+    <div class="flex flex-wrap gap-8 text-sm text-gray-300">
+      <span class="flex items-center gap-2">
+        <svg class="w-4 h-4 text-sand" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0"/></svg>
+        Hasta 600 invitados
+      </span>
+      <span class="flex items-center gap-2">
+        <svg class="w-4 h-4 text-sand" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
+        Anticipo 25%
+      </span>
+      <span class="flex items-center gap-2">
+        <svg class="w-4 h-4 text-sand" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138"/></svg>
+        12 años de experiencia
+      </span>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="bg-white border-b border-gray-100">
+  <div class="max-w-7xl mx-auto px-6 py-10 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+    <div>
+      <p class="font-serif text-4xl text-sand">1,240+</p>
+      <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest mt-1">Eventos celebrados</p>
+    </div>
+    <div>
+      <p class="font-serif text-4xl text-sand">4</p>
+      <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest mt-1">Espacios únicos</p>
+    </div>
+    <div>
+      <p class="font-serif text-4xl text-sand">98%</p>
+      <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest mt-1">Clientes recomiendan</p>
+    </div>
+    <div>
+      <p class="font-serif text-4xl text-sand">24/7</p>
+      <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest mt-1">Soporte dedicado</p>
+    </div>
+  </div>
+</section>
+
+<!-- ESPACIOS -->
+<section class="max-w-7xl mx-auto px-6 py-20">
+  <div class="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
+    <div>
+      <p class="text-xs font-semibold text-sand uppercase tracking-widest mb-2">Espacios</p>
+      <h2 class="font-serif text-4xl md:text-5xl text-gray-900">Cuatro escenarios,<br>una sola promesa.</h2>
+    </div>
+    <p class="text-gray-500 max-w-xs text-sm leading-relaxed">
+      Desde el gran salón hasta la terraza panorámica al mar. Cada espacio fue pensado para un tipo de celebración.
+    </p>
+  </div>
+  <div class="grid md:grid-cols-2 gap-6">
+    {% for espacio in espacios %}
+      {% include 'partials/_espacio_card.html' %}
+    {% endfor %}
+  </div>
+  <div class="text-center mt-10">
+    <a href="{% url 'venues:catalogo' %}" class="btn-secondary">Ver todos los espacios</a>
+  </div>
+</section>
+
+<!-- PAQUETES -->
+<section class="bg-white py-20">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="text-center mb-12">
+      <p class="text-xs font-semibold text-sand uppercase tracking-widest mb-2">Paquetes</p>
+      <h2 class="font-serif text-4xl md:text-5xl text-gray-900 mb-4">Todo incluido, sin sorpresas.</h2>
+      <p class="text-gray-500 max-w-lg mx-auto text-sm leading-relaxed">
+        Elige el paquete que se ajusta a tu visión. Personaliza con servicios adicionales en cualquier momento.
+      </p>
+    </div>
+    <div class="grid md:grid-cols-3 gap-6">
+      {% for paquete in paquetes %}
+        {% include 'partials/_paquete_card.html' with show_cta=True %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- CÓMO FUNCIONA -->
+<section class="max-w-7xl mx-auto px-6 py-20">
+  <div class="text-center mb-12">
+    <p class="text-xs font-semibold text-sand uppercase tracking-widest mb-2">Reserva en línea</p>
+    <h2 class="font-serif text-4xl text-gray-900">Cómo funciona</h2>
+  </div>
+  <div class="grid md:grid-cols-4 gap-6">
+    {% for paso in "1234" %}
+      <div class="card p-6">
+        <p class="font-serif text-4xl text-sand mb-3">0{{ paso }}</p>
+        {% if paso == '1' %}
+          <h3 class="font-medium text-gray-900 mb-2">Elige espacio y fecha</h3>
+          <p class="text-sm text-gray-500">Consulta disponibilidad en tiempo real y bloquea tu día.</p>
+        {% elif paso == '2' %}
+          <h3 class="font-medium text-gray-900 mb-2">Configura tu paquete</h3>
+          <p class="text-sm text-gray-500">Selecciona Básico, Premium o Lujo y añade servicios extra.</p>
+        {% elif paso == '3' %}
+          <h3 class="font-medium text-gray-900 mb-2">Paga el 25%</h3>
+          <p class="text-sm text-gray-500">Anticipo seguro en línea. Liquidación 15 días antes del evento.</p>
+        {% elif paso == '4' %}
+          <h3 class="font-medium text-gray-900 mb-2">Recibe tu código</h3>
+          <p class="text-sm text-gray-500">Código único de evento y acceso a tu portal personal.</p>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- CTA FINAL -->
+<section class="bg-teal-rm py-16">
+  <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
+    <div>
+      <h2 class="font-serif text-3xl text-white mb-2">¿Listo para tu celebración?</h2>
+      <p class="text-teal-light text-sm">Recibe una cotización personalizada en menos de 3 minutos.</p>
+    </div>
+    <a href="{% url 'bookings:paso_1' %}" class="btn-primary flex items-center gap-2 whitespace-nowrap">
+      Cotizar ahora
+      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+    </a>
+  </div>
+</section>
+
+{% endblock %}

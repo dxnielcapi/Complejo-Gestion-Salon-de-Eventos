@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}Nuestros Espacios · Riviera Maya{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-6 py-12">
+  <div class="mb-10">
+    <p class="text-xs font-semibold text-sand uppercase tracking-widest mb-2">Catálogo</p>
+    <h1 class="font-serif text-5xl text-gray-900 mb-4">Nuestros espacios</h1>
+    <p class="text-gray-500 max-w-lg leading-relaxed">Cuatro escenarios distintos, cada uno con su propia personalidad. Elige el que cuente tu historia.</p>
+  </div>
+
+  <!-- FILTROS -->
+  <div class="flex flex-wrap gap-2 mb-10">
+    <div class="flex flex-wrap gap-2">
+      {% for val, label in tipo_opciones %}
+        <a href="?tipo={{ val }}{% if capacidad_filtro != 'todas' %}&capacidad={{ capacidad_filtro }}{% endif %}"
+           class="px-4 py-2 rounded-full text-sm font-medium border transition-colors
+           {% if tipo_filtro == val %}bg-rm-dark text-white border-rm-dark{% else %}bg-white text-gray-600 border-gray-200 hover:border-gray-400{% endif %}">
+          {{ label }}
+        </a>
+      {% endfor %}
+    </div>
+    <div class="w-px bg-gray-200 mx-1 self-stretch hidden md:block"></div>
+    <div class="flex flex-wrap gap-2">
+      {% for val, label in cap_opciones %}
+        <a href="?capacidad={{ val }}{% if tipo_filtro != 'todos' %}&tipo={{ tipo_filtro }}{% endif %}"
+           class="px-4 py-2 rounded-full text-sm font-medium border transition-colors flex items-center gap-1
+           {% if capacidad_filtro == val %}bg-teal-rm text-white border-teal-rm{% else %}bg-white text-gray-600 border-gray-200 hover:border-gray-400{% endif %}">
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0"/></svg>
+          {{ label }}
+        </a>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- GRID -->
+  <div class="grid md:grid-cols-2 gap-6">
+    {% for espacio in espacios %}
+      {% include 'partials/_espacio_card.html' %}
+    {% empty %}
+      <div class="col-span-2 text-center py-20 text-gray-400">
+        <p class="text-lg">No hay espacios que coincidan con los filtros seleccionados.</p>
+        <a href="{% url 'venues:catalogo' %}" class="text-sand hover:underline mt-2 inline-block">Ver todos</a>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

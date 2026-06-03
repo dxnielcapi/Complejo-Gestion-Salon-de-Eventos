@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block title %}Disponibilidad · Riviera Maya{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-6 py-12">
+  <div class="mb-8">
+    <p class="text-xs font-semibold text-sand uppercase tracking-widest mb-2">Disponibilidad</p>
+    <h1 class="font-serif text-5xl text-gray-900 mb-3">Encuentra tu fecha</h1>
+    <p class="text-gray-500">Consulta los días libres por espacio. Las fechas marcadas en coral ya están reservadas.</p>
+  </div>
+
+  <div class="grid lg:grid-cols-3 gap-8">
+    <!-- CALENDARIO -->
+    <div class="lg:col-span-2">
+      <div class="card p-6">
+        <!-- Tabs espacios -->
+        <div class="flex flex-wrap gap-2 mb-6">
+          {% for esp in espacios %}
+            <a href="?espacio={{ esp.slug }}&year={{ year }}&month={{ month }}"
+               class="px-4 py-2 rounded-full text-sm font-medium border transition-colors
+               {% if espacio_sel and espacio_sel.slug == esp.slug %}bg-rm-dark text-white border-rm-dark{% else %}bg-white text-gray-600 border-gray-200 hover:border-gray-400{% endif %}">
+              {{ esp.nombre }}
+            </a>
+          {% endfor %}
+        </div>
+
+        <!-- Header mes -->
+        <div class="flex items-center justify-between mb-6">
+          <a href="?espacio={{ espacio_sel.slug }}&year={{ prev_year }}&month={{ prev_month }}" class="w-9 h-9 flex items-center justify-center rounded-full border border-gray-200 hover:border-gray-400 transition-colors">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+          </a>
+          <p class="font-serif text-xl text-gray-900">{{ month_nombre }}</p>
+          <a href="?espacio={{ espacio_sel.slug }}&year={{ next_year }}&month={{ next_month }}" class="w-9 h-9 flex items-center justify-center rounded-full border border-gray-200 hover:border-gray-400 transition-colors">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+
+        <!-- Días de semana -->
+        <div class="grid grid-cols-7 mb-2">
+          {% for day in "LMXJVSD" %}
+            <div class="text-center text-xs font-semibold text-gray-400 py-1">
+              {% if day == 'L' %}Lun{% elif day == 'M' %}Mar{% elif day == 'X' %}Mié{% elif day == 'J' %}Jue{% elif day == 'V' %}Vie{% elif day == 'S' %}Sáb{% else %}Dom{% endif %}
+            </div>
+          {% endfor %}
+        </div>
+
+        <!-- Días -->
+        <div class="grid grid-cols-7 gap-1">
+          {% for dia in dias_calendario %}
+            {% if dia is None %}
+              <div></div>
+            {% elif dia.pasado %}
+              <div class="aspect-square flex items-center justify-center text-sm text-gray-200">{{ dia.date.day }}</div>
+            {% elif dia.ocupado %}
+              <div class="aspect-square flex flex-col items-center justify-center rounded-lg text-sm text-gray-400 cursor-not-allowed relative" title="Fecha ocupada">
+                <span class="line-through">{{ dia.date.day }}</span>
+                <span class="w-1.5 h-1.5 rounded-full bg-coral mt-1"></span>
+              </div>
+            {% elif dia.es_hoy %}
+              <div class="aspect-square flex flex-col items-center justify-center rounded-lg text-sm font-medium text-teal-rm border border-teal-rm/30">
+                {{ dia.date.day }}
+                <span class="w-1.5 h-1.5 rounded-full bg-teal-rm mt-1"></span>
+              </div>
+            {% else %}
+              <div class="aspect-square flex items-center justify-center rounded-lg text-sm text-gray-700 hover:bg-teal-rm hover:text-white cursor-pointer transition-colors">
+                {{ dia.date.day }}
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+
+        <!-- Leyenda -->
+        <div class="flex gap-6 mt-6 text-xs text-gray-500">
+          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-teal-rm"></span> Seleccionado</span>
+          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-coral"></span> Ocupado</span>
+          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full border border-teal-rm"></span> Hoy</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- INFO ESPACIO SELECCIONADO -->
+    {% if espacio_sel %}
+      <div>
+        <div class="card overflow-hidden">
+          <div class="h-40" style="background-color: {{ espacio_sel.color_card }};"></div>
+          <div class="p-5">
+            <p class="text-xs font-semibold text-teal-rm uppercase tracking-widest mb-1">{{ espacio_sel.get_tipo_display }}</p>
+            <h2 class="font-serif text-2xl text-gray-900 mb-3">{{ espacio_sel.nombre }}</h2>
+            <p class="text-sm text-gray-500 mb-4">Selecciona una fecha en el calendario para continuar.</p>
+            <a href="{% url 'bookings:paso_1' %}" class="btn-primary block text-center">Cotizar este espacio</a>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,124 @@
+{% extends 'operations/base_ops.html' %}
+
+{% block title %}{{ reserva.codigo }} · Admin{% endblock %}
+
+{% block ops_content %}
+<div class="p-8">
+  <a href="{% url 'operations:reservas_lista' %}" class="inline-flex items-center gap-1 text-sm text-teal-rm hover:text-teal-dark mb-6">
+    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+    Reservas
+  </a>
+
+  <div class="flex flex-wrap items-center gap-3 mb-4">
+    <span class="{{ reserva.get_estado_css }} badge">{{ reserva.get_estado_display }}</span>
+    <span class="font-mono text-sm font-bold bg-rm-dark text-white px-3 py-1 rounded-full">{{ reserva.codigo }}</span>
+  </div>
+
+  <div class="flex items-start justify-between mb-6">
+    <div>
+      <h1 class="font-serif text-3xl text-gray-900">{{ reserva.get_tipo_evento_display }} · {{ reserva.cliente.get_full_name }}</h1>
+      <p class="text-gray-500 mt-1">{{ reserva.fecha|date:"l, d \d\e F \d\e Y" }} · {{ reserva.hora_inicio|time:"H:i" }} hrs</p>
+    </div>
+    <div class="flex gap-2">
+      <button class="btn-secondary text-sm flex items-center gap-2 py-2">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+        Editar
+      </button>
+      <button class="btn-secondary text-sm flex items-center gap-2 py-2">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        Exportar
+      </button>
+      {% if reserva.estado != 'confirmada' %}
+        <form method="post" class="inline">
+          {% csrf_token %}
+          <button type="submit" name="action" value="marcar_confirmada" class="btn-primary text-sm py-2">
+            Marcar como confirmada
+          </button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="grid lg:grid-cols-3 gap-6">
+    <!-- LEFT -->
+    <div class="lg:col-span-2 space-y-6">
+      <!-- DETALLES -->
+      <div class="card p-6">
+        <h2 class="font-medium text-gray-900 mb-4">Detalles del evento</h2>
+        <dl class="grid md:grid-cols-2 gap-4 text-sm">
+          <div><dt class="label">Espacio</dt><dd class="font-medium text-gray-900">{{ reserva.espacio.nombre }}<br><span class="text-xs text-gray-400 font-normal">{{ reserva.espacio.get_tipo_display }}</span></dd></div>
+          <div><dt class="label">Paquete</dt><dd class="font-medium text-gray-900">{{ reserva.paquete.get_nombre_display }}<br><span class="text-xs text-gray-400 font-normal">{{ reserva.paquete.duracion_horas }} horas</span></dd></div>
+          <div><dt class="label">Invitados</dt><dd class="font-medium text-gray-900">{{ reserva.num_invitados }}</dd></div>
+          <div><dt class="label">Hora de inicio</dt><dd class="font-medium text-gray-900">{{ reserva.hora_inicio|time:"H:i" }}</dd></div>
+          <div><dt class="label">Creada</dt><dd class="font-medium text-gray-900">{{ reserva.created_at|date:"d M Y" }}</dd></div>
+          <div><dt class="label">Servicios extra</dt><dd class="font-medium text-gray-900">{{ reserva.servicios.count }} seleccionados</dd></div>
+        </dl>
+      </div>
+
+      <!-- CLIENTE -->
+      <div class="card p-6">
+        <h2 class="font-medium text-gray-900 mb-4">Contacto del cliente</h2>
+        <dl class="grid md:grid-cols-3 gap-4 text-sm">
+          <div><dt class="label">Nombre</dt><dd class="font-medium text-gray-900">{{ reserva.cliente.get_full_name }}</dd></div>
+          <div><dt class="label">Correo</dt><dd class="font-medium text-gray-900 break-all">{{ reserva.cliente.email }}</dd></div>
+          <div><dt class="label">Teléfono</dt>
+            <dd class="font-medium text-gray-900">
+              {% if reserva.cliente.perfil %}{{ reserva.cliente.perfil.telefono }}{% else %}—{% endif %}
+            </dd>
+          </div>
+        </dl>
+      </div>
+
+      <!-- NOTAS -->
+      <div class="card p-6">
+        <h2 class="font-medium text-gray-900 mb-4">Notas internas</h2>
+        <form method="post">
+          {% csrf_token %}
+          <textarea name="notas" rows="4" class="form-input resize-none"
+                    placeholder="Notas sobre el cliente, requerimientos especiales…">{{ reserva.notas_internas }}</textarea>
+          <div class="flex justify-end mt-3">
+            <button type="submit" name="action" value="guardar_notas" class="btn-secondary text-sm py-2">Guardar notas</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="space-y-4">
+      <!-- FINANCIERO -->
+      <div class="card p-6">
+        <h3 class="font-medium text-gray-900 mb-4">Resumen financiero</h3>
+        <dl class="space-y-2 text-sm">
+          <div class="flex justify-between text-gray-500"><dt>Total del evento</dt><dd>${{ reserva.total_evento|floatformat:0 }}</dd></div>
+          <div class="flex justify-between text-teal-rm font-medium"><dt>Anticipo recibido</dt><dd>${{ reserva.anticipo_pagado|floatformat:0 }}</dd></div>
+          <hr class="border-gray-100">
+          <div class="flex justify-between text-coral font-semibold"><dt>Saldo pendiente</dt><dd>${{ reserva.saldo_pendiente|floatformat:0 }}</dd></div>
+        </dl>
+        <form method="post" class="mt-4">
+          {% csrf_token %}
+          <input type="number" name="monto" placeholder="Monto a registrar" class="form-input mb-2">
+          <button type="submit" name="action" value="registrar_pago" class="btn-primary w-full text-sm py-2">Registrar pago</button>
+        </form>
+      </div>
+
+      <!-- ACTIVIDAD -->
+      <div class="card p-5">
+        <h3 class="font-medium text-gray-900 mb-4">Actividad</h3>
+        <div class="space-y-3">
+          {% for act in actividad %}
+            <div class="flex items-start gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-teal-rm flex-shrink-0 mt-1.5"></span>
+              <div>
+                <p class="text-xs text-gray-700">{% if act.usuario %}{{ act.usuario.first_name }} {{ act.usuario.last_name|first }}. · {% endif %}{{ act.descripcion }}</p>
+                <p class="text-xs text-gray-400">{{ act.created_at|date:"d M Y" }} · {{ act.created_at|time:"H:i" }}</p>
+              </div>
+            </div>
+          {% empty %}
+            <p class="text-xs text-gray-400">Sin actividad registrada.</p>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

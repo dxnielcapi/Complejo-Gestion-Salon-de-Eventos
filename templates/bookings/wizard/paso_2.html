@@ -1,0 +1,38 @@
+{% extends 'bookings/wizard/base_wizard.html' %}
+
+{% block wizard_content %}
+<h1 class="font-serif text-3xl text-gray-900 mb-8">Elige tu espacio</h1>
+
+<form method="post" id="paso-form">
+  {% csrf_token %}
+  <input type="hidden" name="espacio_id" id="espacio_id_hidden" value="{{ wizard_data.espacio_id|default:'' }}">
+
+  <div class="grid md:grid-cols-2 gap-4">
+    {% for espacio in espacios %}
+      <label class="cursor-pointer">
+        <input type="radio" name="_espacio" value="{{ espacio.pk }}"
+               {% if wizard_data.espacio_id == espacio.pk %}checked{% endif %}
+               class="peer sr-only" onchange="document.getElementById('espacio_id_hidden').value=this.value">
+        <div class="border-2 rounded-2xl overflow-hidden transition-all border-gray-200 peer-checked:border-sand peer-checked:shadow-md">
+          <div class="h-32" style="background-color: {{ espacio.color_card }};"></div>
+          <div class="p-4">
+            <p class="text-xs text-teal-rm font-semibold uppercase tracking-wider">{{ espacio.get_tipo_display }}</p>
+            <p class="font-medium text-gray-900">{{ espacio.nombre }}</p>
+            <div class="flex items-center justify-between mt-2">
+              <span class="text-xs text-gray-400">Hasta {{ espacio.capacidad_max }} personas</span>
+              <span class="text-sm font-semibold text-gray-900">desde ${{ espacio.precio_base|floatformat:0 }}</span>
+            </div>
+          </div>
+        </div>
+      </label>
+    {% endfor %}
+  </div>
+</form>
+{% endblock %}
+
+{% block wizard_next %}
+  <button type="submit" form="paso-form" class="btn-primary flex items-center gap-2">
+    Continuar
+    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+  </button>
+{% endblock %}

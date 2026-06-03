@@ -1,0 +1,25 @@
+{% extends 'bookings/wizard/base_wizard.html' %}
+
+{% block wizard_content %}
+<h1 class="font-serif text-3xl text-gray-900 mb-8">Selecciona la fecha</h1>
+
+<form method="post" id="paso-form">
+  {% csrf_token %}
+  <div>
+    <label class="label" for="id_fecha">Fecha del evento</label>
+    <input type="date" name="fecha" id="id_fecha"
+           value="{{ form.fecha.value|default:'' }}"
+           min="{% now 'Y-m-d' %}"
+           class="form-input max-w-xs">
+    <p class="text-xs text-gray-400 mt-2">Las fechas disponibles se muestran en el calendario de disponibilidad.</p>
+    <a href="{% url 'venues:disponibilidad' %}" class="text-xs text-teal-rm hover:underline mt-1 inline-block">Ver disponibilidad →</a>
+  </div>
+</form>
+{% endblock %}
+
+{% block wizard_next %}
+  <button type="submit" form="paso-form" class="btn-primary flex items-center gap-2">
+    Continuar
+    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+  </button>
+{% endblock %}

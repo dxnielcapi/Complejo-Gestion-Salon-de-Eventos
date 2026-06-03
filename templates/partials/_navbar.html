@@ -1,0 +1,32 @@
+{% load static %}
+<nav class="fixed top-0 left-0 right-0 z-40 bg-white/90 backdrop-blur border-b border-gray-100">
+  <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+    <a href="{% url 'core:home' %}" class="flex items-center gap-2">
+      <span class="text-xs font-semibold tracking-widest text-gray-400 uppercase">Riviera Maya</span>
+      <span class="text-gray-200">·</span>
+      <span class="text-xs font-semibold tracking-widest text-sand uppercase">Salón de Eventos</span>
+    </a>
+
+    <div class="hidden md:flex items-center gap-8">
+      <a href="{% url 'venues:catalogo' %}" class="text-sm text-gray-600 hover:text-sand transition-colors">Espacios</a>
+      <a href="{% url 'venues:paquetes' %}" class="text-sm text-gray-600 hover:text-sand transition-colors">Paquetes</a>
+      <a href="{% url 'venues:disponibilidad' %}" class="text-sm text-gray-600 hover:text-sand transition-colors">Disponibilidad</a>
+    </div>
+
+    <div class="flex items-center gap-3">
+      {% if user.is_authenticated %}
+        {% if user.is_staff %}
+          <a href="{% url 'operations:dashboard' %}" class="text-xs font-medium text-teal-rm hover:underline">Panel Admin</a>
+        {% else %}
+          <a href="{% url 'bookings:mis_reservas' %}" class="text-xs font-medium text-teal-rm hover:underline">Mis reservas</a>
+        {% endif %}
+        <a href="{% url 'accounts:logout' %}" class="text-xs text-gray-500 hover:text-gray-800">Salir</a>
+      {% else %}
+        <a href="{% url 'accounts:login' %}" class="text-sm text-gray-600 hover:text-sand transition-colors">Iniciar sesión</a>
+      {% endif %}
+      <a href="{% url 'bookings:paso_1' %}" class="btn-primary text-sm py-2 px-5">Cotizar</a>
+    </div>
+  </div>
+</nav>
+<!-- spacer -->
+<div class="h-16"></div>

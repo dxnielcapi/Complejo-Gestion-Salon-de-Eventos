@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}Paquetes y Servicios · Riviera Maya{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-6 py-12">
+  <div class="mb-12">
+    <p class="text-xs font-semibold text-sand uppercase tracking-widest mb-2">Paquetes</p>
+    <h1 class="font-serif text-5xl text-gray-900 mb-4">Cada celebración, su paquete.</h1>
+    <p class="text-gray-500 max-w-lg leading-relaxed">
+      Tres niveles de experiencia. Todos incluyen banquete, música y mobiliario. La diferencia está en los detalles.
+    </p>
+  </div>
+
+  <div class="grid md:grid-cols-3 gap-6 mb-20">
+    {% for paquete in paquetes %}
+      {% include 'partials/_paquete_card.html' with show_cta=True %}
+    {% endfor %}
+  </div>
+
+  <!-- SERVICIOS ADICIONALES -->
+  <div>
+    <p class="text-xs font-semibold text-sand uppercase tracking-widest mb-2">Servicios adicionales</p>
+    <h2 class="font-serif text-4xl text-gray-900 mb-3">Personaliza tu evento</h2>
+    <p class="text-gray-500 mb-8 leading-relaxed max-w-lg">
+      Añade los detalles que harán único tu día. Cualquier paquete puede ampliarse con estos servicios.
+    </p>
+    <div class="grid md:grid-cols-3 gap-4">
+      {% for s in servicios %}
+        <div class="bg-white rounded-xl border border-gray-100 p-4 flex items-center gap-4">
+          <div class="w-10 h-10 rounded-xl bg-sand/10 flex items-center justify-center flex-shrink-0">
+            <svg class="w-5 h-5 text-sand" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+            </svg>
+          </div>
+          <div>
+            <p class="font-medium text-gray-900 text-sm">{{ s.nombre }}</p>
+            <p class="text-sand font-semibold text-sm">{{ s.precio_display }}</p>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

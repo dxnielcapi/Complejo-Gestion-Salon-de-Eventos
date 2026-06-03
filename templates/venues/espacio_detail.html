@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ espacio.nombre }} · Riviera Maya{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-6 py-8">
+  <a href="{% url 'venues:catalogo' %}" class="inline-flex items-center gap-1 text-sm text-teal-rm hover:text-teal-dark mb-6">
+    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+    Volver a espacios
+  </a>
+
+  <!-- HERO imagen -->
+  <div class="relative rounded-2xl overflow-hidden h-80 mb-8" style="background-color: {{ espacio.color_card }};">
+    {% if espacio.imagen_principal %}
+      <img src="{{ espacio.imagen_principal.url }}" alt="{{ espacio.nombre }}" class="w-full h-full object-cover">
+    {% endif %}
+    <div class="absolute bottom-4 left-4">
+      <span class="bg-black/40 backdrop-blur text-white text-xs px-3 py-1 rounded-full">{{ espacio.tags }}</span>
+    </div>
+  </div>
+
+  <div class="grid lg:grid-cols-3 gap-10">
+    <!-- MAIN -->
+    <div class="lg:col-span-2">
+      <p class="text-xs font-semibold text-teal-rm uppercase tracking-widest mb-2">{{ espacio.get_tipo_display }}</p>
+      <h1 class="font-serif text-4xl text-gray-900 mb-4">{{ espacio.nombre }}</h1>
+      <p class="text-gray-600 leading-relaxed mb-8">{{ espacio.descripcion }}</p>
+
+      <div class="flex gap-8 mb-8">
+        <div class="flex items-center gap-2">
+          <svg class="w-5 h-5 text-teal-rm" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0"/></svg>
+          <div>
+            <p class="text-xs text-gray-400 uppercase tracking-wider">Capacidad</p>
+            <p class="font-semibold text-gray-900">{{ espacio.capacidad_max }} personas</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <svg class="w-5 h-5 text-teal-rm" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <div>
+            <p class="text-xs text-gray-400 uppercase tracking-wider">Eventos</p>
+            <p class="font-semibold text-gray-900">{{ espacio.eventos_por_dia }} por día</p>
+          </div>
+        </div>
+      </div>
+
+      {% if caracteristicas %}
+        <h2 class="font-medium text-gray-900 text-lg mb-4">Lo que incluye este espacio</h2>
+        <ul class="grid md:grid-cols-2 gap-2 mb-10">
+          {% for c in caracteristicas %}
+            <li class="flex items-center gap-2 text-sm text-gray-700">
+              <svg class="w-4 h-4 text-teal-rm flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+              {{ c.descripcion }}
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+
+      {% if imagenes %}
+        <h2 class="font-medium text-gray-900 text-lg mb-4">Galería</h2>
+        <div class="grid grid-cols-3 gap-3">
+          {% for img in imagenes %}
+            <div class="rounded-xl overflow-hidden h-32" style="background-color: {{ espacio.color_card }}80;">
+              <img src="{{ img.imagen.url }}" alt="{{ img.caption }}" class="w-full h-full object-cover">
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- SIDEBAR -->
+    <div>
+      <div class="card p-6 sticky top-24">
+        <p class="text-xs text-gray-400 uppercase tracking-wider mb-1">Rango de inversión</p>
+        <p class="font-serif text-2xl text-gray-900 mb-1">
+          ${{ espacio.precio_base|floatformat:0 }}
+          {% if espacio.precio_max %} – ${{ espacio.precio_max|floatformat:0 }} MXN{% endif %}
+        </p>
+        <p class="text-xs text-gray-400 mb-6">Varía según paquete, fecha y número de invitados.</p>
+
+        <a href="{% url 'bookings:paso_1' %}" class="btn-primary block text-center mb-3 flex items-center justify-center gap-2">
+          Cotizar este espacio
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        </a>
+        <a href="{% url 'venues:disponibilidad' %}?espacio={{ espacio.slug }}" class="btn-secondary block text-center flex items-center justify-center gap-2">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          Ver disponibilidad
+        </a>
+
+        <div class="mt-6 space-y-2">
+          <div class="flex items-center gap-2 text-xs text-gray-500">
+            <svg class="w-3.5 h-3.5 text-teal-rm" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            Anticipo del 25% para reservar tu fecha.
+          </div>
+          <div class="flex items-center gap-2 text-xs text-gray-500">
+            <svg class="w-3.5 h-3.5 text-teal-rm" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            Liquidación 15 días antes del evento.
+          </div>
+          <div class="flex items-center gap-2 text-xs text-gray-500">
+            <svg class="w-3.5 h-3.5 text-teal-rm" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
+            Cada evento recibe un código único.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

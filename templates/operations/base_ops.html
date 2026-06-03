@@ -1,0 +1,72 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Panel Admin · Riviera Maya{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/dist/styles.css' %}">
+</head>
+<body class="bg-cream text-gray-800 antialiased">
+
+<div class="flex min-h-screen">
+  <!-- SIDEBAR -->
+  <aside class="w-48 bg-white border-r border-gray-100 flex flex-col sticky top-0 h-screen">
+    <div class="p-5 border-b border-gray-100">
+      <p class="text-xs font-bold tracking-widest text-sand uppercase">Riviera Maya</p>
+      <p class="text-xs text-gray-400">Salón de Eventos</p>
+    </div>
+
+    <nav class="flex-1 p-3 space-y-1">
+      <p class="text-xs font-semibold text-gray-300 uppercase tracking-wider px-2 pt-2 pb-1">Operación</p>
+      <a href="{% url 'operations:dashboard' %}" class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors {% if request.resolver_match.url_name == 'dashboard' %}bg-gray-100 text-gray-900 font-medium{% else %}text-gray-500 hover:bg-gray-50{% endif %}">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+        Inicio
+      </a>
+      <a href="{% url 'operations:agenda' %}" class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors {% if request.resolver_match.url_name == 'agenda' %}bg-gray-100 text-gray-900 font-medium{% else %}text-gray-500 hover:bg-gray-50{% endif %}">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+        Agenda
+      </a>
+      <a href="{% url 'operations:reservas_lista' %}" class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors {% if 'reservas' in request.resolver_match.url_name %}bg-gray-100 text-gray-900 font-medium{% else %}text-gray-500 hover:bg-gray-50{% endif %}">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+        Reservas
+      </a>
+      <a href="{% url 'operations:catalogo' %}" class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors {% if request.resolver_match.url_name == 'catalogo' %}bg-gray-100 text-gray-900 font-medium{% else %}text-gray-500 hover:bg-gray-50{% endif %}">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+        Catálogo
+      </a>
+      <a href="{% url 'operations:reportes' %}" class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors {% if request.resolver_match.url_name == 'reportes' %}bg-gray-100 text-gray-900 font-medium{% else %}text-gray-500 hover:bg-gray-50{% endif %}">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+        Reportes
+      </a>
+
+      <p class="text-xs font-semibold text-gray-300 uppercase tracking-wider px-2 pt-4 pb-1">Sistema</p>
+      <a href="{% url 'django-admin:index' %}" class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-500 hover:bg-gray-50 transition-colors">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        Configuración
+      </a>
+    </nav>
+
+    <!-- USER -->
+    <div class="p-3 border-t border-gray-100">
+      <div class="flex items-center gap-2 px-2">
+        <div class="w-7 h-7 rounded-full bg-teal-rm flex items-center justify-center text-white text-xs font-semibold">
+          {{ user.first_name|first }}
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-xs font-medium text-gray-900 truncate">{{ user.get_full_name }}</p>
+          <p class="text-xs text-gray-400">Gerente de eventos</p>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="flex-1 overflow-auto">
+    {% block ops_content %}{% endblock %}
+  </main>
+</div>
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>

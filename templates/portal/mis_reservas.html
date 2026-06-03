@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+
+{% block title %}Mis Reservas · Portal Cliente{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-6 py-10">
+  <div class="flex items-start justify-between mb-8">
+    <div>
+      <p class="text-xs font-semibold text-sand uppercase tracking-widest mb-1">Portal Cliente</p>
+      <h1 class="font-serif text-4xl text-gray-900">Hola, {{ user.first_name }}</h1>
+      <p class="text-gray-500 mt-1">Tus eventos en un solo lugar.</p>
+    </div>
+    <a href="{% url 'bookings:paso_1' %}" class="btn-primary flex items-center gap-2">
+      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+      Nueva reserva
+    </a>
+  </div>
+
+  <!-- STATS -->
+  <div class="grid md:grid-cols-3 gap-4 mb-10">
+    <div class="card p-5 flex items-center justify-between">
+      <div>
+        <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest">Eventos activos</p>
+        <p class="font-serif text-4xl text-gray-900 mt-1">{{ activas }}</p>
+      </div>
+      <svg class="w-8 h-8 text-gray-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+    </div>
+    <div class="card p-5 flex items-center justify-between">
+      <div>
+        <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest">Total invertido</p>
+        <p class="font-serif text-4xl text-gray-900 mt-1">${{ total_invertido|floatformat:0 }}</p>
+      </div>
+      <svg class="w-8 h-8 text-gray-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+    </div>
+    <div class="card p-5 flex items-center justify-between">
+      <div>
+        <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest">Próximo evento</p>
+        {% if proxima %}
+          <p class="font-serif text-2xl text-gray-900 mt-1">{{ proxima.fecha|date:"d M Y" }}</p>
+          <p class="text-xs text-gray-400">{{ proxima.get_tipo_evento_display }}</p>
+        {% else %}
+          <p class="text-gray-400 mt-1 text-sm">Sin eventos próximos</p>
+        {% endif %}
+      </div>
+      <svg class="w-8 h-8 text-gray-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
+    </div>
+  </div>
+
+  <!-- FILTROS -->
+  <div class="flex flex-wrap gap-2 mb-6">
+    {% for val, label in filtros %}
+      <a href="?estado={{ val }}"
+         class="px-4 py-2 rounded-full text-sm font-medium border transition-colors
+         {% if estado_filtro == val %}bg-rm-dark text-white border-rm-dark{% else %}bg-white text-gray-600 border-gray-200 hover:border-gray-400{% endif %}">
+        {{ label }}
+      </a>
+    {% endfor %}
+  </div>
+
+  <!-- LISTA -->
+  <div class="space-y-4">
+    {% for r in reservas %}
+      <div class="card flex overflow-hidden">
+        <div class="w-32 flex-shrink-0" style="background-color: {{ r.espacio.color_card }};"></div>
+        <div class="flex-1 p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2 mb-2">
+              <span class="{{ r.get_estado_css }} badge">{{ r.get_estado_display }}</span>
+              <span class="text-xs font-mono text-gray-400">{{ r.codigo }}</span>
+            </div>
+            <h3 class="font-medium text-gray-900">{{ r.get_tipo_evento_display }} · {{ r.espacio.nombre }}</h3>
+            <div class="flex flex-wrap gap-4 mt-2 text-xs text-gray-400">
+              <span class="flex items-center gap-1">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                {{ r.fecha|date:"l, d \d\e F \d\e Y" }}
+              </span>
+              <span class="flex items-center gap-1">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0"/></svg>
+                {{ r.num_invitados }} invitados
+              </span>
+              <span>{{ r.paquete.get_nombre_display }}</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-6">
+            <div class="text-right">
+              <p class="text-xs text-gray-400 uppercase tracking-wider">Total</p>
+              <p class="font-semibold text-gray-900">${{ r.total_evento|floatformat:0 }}</p>
+            </div>
+            <a href="{% url 'bookings:detalle_cliente' r.codigo %}" class="flex items-center gap-1 text-sm text-teal-rm font-medium hover:text-teal-dark">
+              Ver detalle
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <div class="text-center py-16 text-gray-400">
+        <p class="text-lg mb-4">No tienes reservas activas.</p>
+        <a href="{% url 'bookings:paso_1' %}" class="btn-primary">Cotizar mi primer evento</a>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Pass filter labels to template via view context
+  const filtros = [
+    ['todas', 'Todas'],
+    ['confirmada', 'Confirmada'],
+    ['pendiente_liquidacion', 'Pendiente liquidación'],
+    ['completada', 'Completada'],
+  ];
+</script>
+{% endblock %}

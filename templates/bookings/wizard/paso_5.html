@@ -1,0 +1,30 @@
+{% extends 'bookings/wizard/base_wizard.html' %}
+
+{% block wizard_content %}
+<h1 class="font-serif text-3xl text-gray-900 mb-2">Servicios adicionales</h1>
+<p class="text-gray-500 mb-8">Opcionales. Puedes añadir o modificar hasta 30 días antes del evento.</p>
+
+<form method="post" id="paso-form">
+  {% csrf_token %}
+  <div class="grid md:grid-cols-2 gap-3">
+    {% for s in servicios %}
+      <label class="cursor-pointer flex items-center gap-4 p-4 border-2 rounded-xl transition-colors border-gray-100 hover:border-gray-300 has-[:checked]:border-sand has-[:checked]:bg-sand/5">
+        <input type="checkbox" name="servicios" value="{{ s.pk }}"
+               {% if s.pk in wizard_data.servicios_ids %}checked{% endif %}
+               class="w-4 h-4 accent-[#C9A96E]">
+        <div class="flex-1">
+          <p class="text-sm font-medium text-gray-900">{{ s.nombre }}</p>
+          <p class="text-sm text-sand font-semibold">{{ s.precio_display }}</p>
+        </div>
+      </label>
+    {% endfor %}
+  </div>
+</form>
+{% endblock %}
+
+{% block wizard_next %}
+  <button type="submit" form="paso-form" class="btn-primary flex items-center gap-2">
+    Continuar
+    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+  </button>
+{% endblock %}

@@ -1,0 +1,142 @@
+{% extends 'operations/base_ops.html' %}
+
+{% block title %}Dashboard · Admin{% endblock %}
+
+{% block ops_content %}
+<div class="p-8">
+  <div class="flex items-start justify-between mb-8">
+    <div>
+      <p class="text-xs font-semibold text-sand uppercase tracking-widest mb-1">Admin · {{ hoy|date:"F Y"|capfirst }}</p>
+      <h1 class="font-serif text-3xl text-gray-900">Buen día, {{ user.first_name }}</h1>
+      {% if reservas_liquidar %}
+        <p class="text-sm text-gray-500 mt-1">Tienes {{ reservas_liquidar }} reserva{{ reservas_liquidar|pluralize }} con saldo por liquidar esta semana.</p>
+      {% endif %}
+    </div>
+    <div class="flex gap-2">
+      <button class="btn-secondary flex items-center gap-2 text-sm py-2">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        Exportar
+      </button>
+      <a href="{% url 'bookings:paso_1' %}" class="btn-primary flex items-center gap-2 text-sm py-2">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        Nueva reserva
+      </a>
+    </div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="grid md:grid-cols-4 gap-4 mb-8">
+    <div class="card p-5">
+      <div class="flex items-center justify-between mb-2">
+        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Eventos del mes</p>
+        <svg class="w-5 h-5 text-gray-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+      </div>
+      <p class="font-serif text-4xl text-gray-900">{{ eventos_mes }}</p>
+      <p class="text-xs text-green-500 mt-1">↑ 18% vs mes anterior</p>
+    </div>
+    <div class="card p-5">
+      <div class="flex items-center justify-between mb-2">
+        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Ingresos confirmados</p>
+        <svg class="w-5 h-5 text-gray-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+      </div>
+      <p class="font-serif text-3xl text-gray-900">${{ ingresos_confirmados|floatformat:0 }}</p>
+      <p class="text-xs text-green-500 mt-1">↑ 24% vs mes anterior</p>
+    </div>
+    <div class="card p-5">
+      <div class="flex items-center justify-between mb-2">
+        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Pipeline total</p>
+        <svg class="w-5 h-5 text-gray-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+      </div>
+      <p class="font-serif text-3xl text-gray-900">${{ pipeline_total|floatformat:0 }}</p>
+      <p class="text-xs text-green-500 mt-1">↑ 12% vs mes anterior</p>
+    </div>
+    <div class="card p-5">
+      <div class="flex items-center justify-between mb-2">
+        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Tasa de ocupación</p>
+        <svg class="w-5 h-5 text-gray-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/></svg>
+      </div>
+      <p class="font-serif text-4xl text-gray-900">{{ tasa_ocupacion }}%</p>
+      <p class="text-xs text-green-500 mt-1">↑ 6% vs mes anterior</p>
+    </div>
+  </div>
+
+  <div class="grid lg:grid-cols-3 gap-6">
+    <!-- PRÓXIMOS EVENTOS -->
+    <div class="lg:col-span-2 card">
+      <div class="flex items-center justify-between p-5 border-b border-gray-100">
+        <h2 class="font-medium text-gray-900">Próximos eventos</h2>
+        <a href="{% url 'operations:reservas_lista' %}" class="text-xs text-teal-rm hover:underline flex items-center gap-1">
+          Ver todos
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+            <th class="px-5 py-3 text-left">Código</th>
+            <th class="px-5 py-3 text-left">Cliente / Evento</th>
+            <th class="px-5 py-3 text-left">Espacio</th>
+            <th class="px-5 py-3 text-left">Fecha</th>
+            <th class="px-5 py-3 text-left">Estado</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-50">
+          {% for r in proximos %}
+            <tr class="hover:bg-gray-50 transition-colors">
+              <td class="px-5 py-4 font-mono text-xs text-gray-500">{{ r.codigo }}</td>
+              <td class="px-5 py-4">
+                <p class="font-semibold text-gray-900">{{ r.cliente.get_full_name }}</p>
+                <p class="text-xs text-gray-400">{{ r.get_tipo_evento_display }} · {{ r.num_invitados }} invitados</p>
+              </td>
+              <td class="px-5 py-4 text-gray-600">{{ r.espacio.nombre }}</td>
+              <td class="px-5 py-4 text-gray-600">{{ r.fecha|date:"d M Y" }}</td>
+              <td class="px-5 py-4">
+                <span class="{{ r.get_estado_css }} badge">{{ r.get_estado_display }}</span>
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="5" class="px-5 py-8 text-center text-gray-400">No hay eventos próximos.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- SIDEBAR -->
+    <div class="space-y-4">
+      <!-- Ocupación -->
+      <div class="card p-5">
+        <h3 class="font-medium text-gray-900 mb-4">Ocupación por espacio</h3>
+        <div class="space-y-3">
+          {% for item in ocupacion_por_espacio %}
+            <div>
+              <div class="flex justify-between text-sm mb-1">
+                <span class="text-gray-600 truncate">{{ item.espacio.nombre }}</span>
+                <span class="text-gray-400">{{ item.count }} eventos</span>
+              </div>
+              <div class="h-1.5 bg-gray-100 rounded-full">
+                <div class="h-1.5 rounded-full bg-teal-rm" style="width: {% if item.count %}{{ item.count|add:0 }}0%{% else %}5%{% endif %}"></div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Tareas -->
+      <div class="card p-5">
+        <h3 class="font-medium text-gray-900 mb-4">Tareas pendientes</h3>
+        <div class="space-y-2">
+          {% for t in tareas %}
+            <div class="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50">
+              <span class="w-2 h-2 rounded-full flex-shrink-0" style="background-color: {{ t.get_color }};"></span>
+              <span class="text-sm text-gray-700 flex-1">{{ t.descripcion }}</span>
+              <button class="w-5 h-5 border border-gray-200 rounded flex-shrink-0 hover:border-teal-rm transition-colors"></button>
+            </div>
+          {% empty %}
+            <p class="text-sm text-gray-400">Sin tareas pendientes.</p>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends 'bookings/wizard/base_wizard.html' %}
+
+{% block wizard_content %}
+<h1 class="font-serif text-3xl text-gray-900 mb-8">Cuéntanos del evento</h1>
+
+<form method="post" id="paso-form">
+  {% csrf_token %}
+
+  <div class="mb-8">
+    <label class="label">Tipo de evento</label>
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+      {% for value, label in form.tipo_evento.field.choices %}
+        <label class="relative cursor-pointer">
+          <input type="radio" name="tipo_evento" value="{{ value }}"
+                 {% if form.tipo_evento.value == value %}checked{% endif %}
+                 class="peer sr-only">
+          <div class="border-2 rounded-xl px-4 py-3 text-sm font-medium text-center transition-all
+                      border-gray-200 text-gray-600
+                      peer-checked:border-sand peer-checked:bg-sand peer-checked:text-white">
+            {{ label }}
+          </div>
+        </label>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="grid md:grid-cols-2 gap-6">
+    <div>
+      <label class="label" for="id_num_invitados">Número de invitados estimado</label>
+      <input type="number" name="num_invitados" id="id_num_invitados" min="1" max="600"
+             value="{{ form.num_invitados.value|default:'150' }}"
+             class="form-input">
+      <p class="text-xs text-gray-400 mt-1">Solo registramos el número, no datos de los asistentes.</p>
+    </div>
+    <div>
+      <label class="label" for="id_hora_inicio">Hora de inicio</label>
+      <select name="hora_inicio" id="id_hora_inicio" class="form-input">
+        {% for value, label in form.hora_inicio.field.widget.choices %}
+          <option value="{{ value }}" {% if form.hora_inicio.value == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+</form>
+{% endblock %}
+
+{% block wizard_next %}
+  <button type="submit" form="paso-form" class="btn-primary flex items-center gap-2">
+    Continuar
+    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+  </button>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends 'bookings/wizard/base_wizard.html' %}
+
+{% block wizard_content %}
+<h1 class="font-serif text-3xl text-gray-900 mb-8">Elige tu paquete</h1>
+
+<form method="post" id="paso-form">
+  {% csrf_token %}
+  <input type="hidden" name="paquete_id" id="paquete_id_hidden" value="{{ wizard_data.paquete_id|default:'' }}">
+
+  <div class="grid md:grid-cols-3 gap-4">
+    {% for paquete in paquetes %}
+      <label class="cursor-pointer relative">
+        {% if paquete.es_mas_popular %}
+          <div class="absolute -top-3 left-4 z-10">
+            <span class="bg-sand text-white text-xs font-bold px-3 py-1 rounded-full">Más popular</span>
+          </div>
+        {% endif %}
+        <input type="radio" name="_paquete" value="{{ paquete.pk }}"
+               {% if wizard_data.paquete_id == paquete.pk %}checked{% endif %}
+               class="peer sr-only" onchange="document.getElementById('paquete_id_hidden').value=this.value">
+        <div class="border-2 rounded-2xl p-5 h-full transition-all border-gray-200 peer-checked:border-sand peer-checked:shadow-md">
+          <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-1">Paquete</p>
+          <h3 class="font-serif text-2xl text-gray-900 mb-1">{{ paquete.get_nombre_display }}</h3>
+          <p class="text-xs text-gray-400 mb-3">{{ paquete.duracion_horas }} horas · {{ paquete.descripcion_corta }}</p>
+          <p class="text-xl font-semibold text-gray-900">${{ paquete.precio_por_persona|floatformat:0 }} <span class="text-xs font-normal text-gray-400">/persona</span></p>
+        </div>
+      </label>
+    {% endfor %}
+  </div>
+</form>
+{% endblock %}
+
+{% block wizard_next %}
+  <button type="submit" form="paso-form" class="btn-primary flex items-center gap-2">
+    Continuar
+    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+  </button>
+{% endblock %}

@@ -1,0 +1,138 @@
+{% extends 'operations/base_ops.html' %}
+
+{% block title %}Reportes · Admin{% endblock %}
+
+{% block ops_content %}
+<div class="p-8">
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <p class="text-xs font-semibold text-sand uppercase tracking-widest mb-1">Reportes</p>
+      <h1 class="font-serif text-3xl text-gray-900">Métricas y rendimiento</h1>
+    </div>
+    <div class="flex gap-2 items-center">
+      <form method="get">
+        <select name="anio" onchange="this.form.submit()" class="form-input text-sm py-2">
+          {% for y in "2024 2025 2026 2027"|split:" " %}
+            <option value="{{ y }}" {% if anio|stringformat:"d" == y %}selected{% endif %}>{{ y }}</option>
+          {% endfor %}
+        </select>
+      </form>
+      <button class="btn-secondary text-sm py-2 flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        Descargar PDF
+      </button>
+    </div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="grid md:grid-cols-4 gap-4 mb-8">
+    <div class="card p-5">
+      <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Ingresos del año</p>
+      <p class="font-serif text-3xl text-gray-900">${{ ingresos_anio|floatformat:0 }}</p>
+      <p class="text-xs text-green-500 mt-1">↑ 34% vs año anterior</p>
+    </div>
+    <div class="card p-5">
+      <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Eventos celebrados</p>
+      <p class="font-serif text-4xl text-gray-900">{{ eventos_celebrados }}</p>
+      <p class="text-xs text-green-500 mt-1">↑ 18% vs año anterior</p>
+    </div>
+    <div class="card p-5">
+      <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Ticket promedio</p>
+      <p class="font-serif text-3xl text-gray-900">${{ ticket_promedio|floatformat:0 }}</p>
+      <p class="text-xs text-green-500 mt-1">↑ 9% vs año anterior</p>
+    </div>
+    <div class="card p-5">
+      <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">NPS Clientes</p>
+      <p class="font-serif text-4xl text-gray-900">{{ nps }}</p>
+      <p class="text-xs text-green-500 mt-1">↑ 4 pts vs año anterior</p>
+    </div>
+  </div>
+
+  <div class="grid lg:grid-cols-2 gap-6 mb-6">
+    <!-- INGRESOS POR MES -->
+    <div class="card p-6">
+      <h2 class="font-medium text-gray-900 mb-4">Ingresos por mes</h2>
+      {% if ingresos_mes %}
+        {% with max_val=ingresos_mes|dictsortreversed:"total"|first %}
+          <div class="flex items-end gap-2 h-40">
+            {% for m in ingresos_mes %}
+              <div class="flex-1 flex flex-col items-center gap-1">
+                <div class="w-full rounded-t-sm bg-teal-rm/70 hover:bg-teal-rm transition-colors"
+                     style="height: {% if max_val.total > 0 %}{% widthratio m.total max_val.total 100 %}%{% else %}2%{% endif %}; min-height: 4px;"></div>
+                <span class="text-xs text-gray-400">{{ m.mes }}</span>
+              </div>
+            {% endfor %}
+          </div>
+        {% endwith %}
+      {% else %}
+        <p class="text-gray-400 text-sm">Sin datos para este año.</p>
+      {% endif %}
+    </div>
+
+    <!-- MIX POR TIPO -->
+    <div class="card p-6">
+      <h2 class="font-medium text-gray-900 mb-4">Mix por tipo de evento</h2>
+      {% with total_ev=eventos_celebrados|default:1 %}
+        <div class="space-y-3">
+          {% for t in tipo_mix %}
+            {% if t.count > 0 %}
+              <div>
+                <div class="flex justify-between text-sm mb-1">
+                  <span class="text-gray-600">{{ t.tipo }}</span>
+                  <span class="text-gray-400">{% widthratio t.count total_ev 100 %}%</span>
+                </div>
+                <div class="h-2 bg-gray-100 rounded-full">
+                  <div class="h-2 rounded-full bg-sand" style="width: {% widthratio t.count total_ev 100 %}%"></div>
+                </div>
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+      {% endwith %}
+    </div>
+  </div>
+
+  <div class="grid lg:grid-cols-2 gap-6">
+    <!-- TOP ESPACIOS -->
+    <div class="card p-6">
+      <h2 class="font-medium text-gray-900 mb-4">Top espacios</h2>
+      <div class="space-y-3">
+        {% for item in top_espacios %}
+          <div>
+            <div class="flex justify-between text-sm mb-1">
+              <span class="text-gray-600">{{ item.espacio.nombre }}</span>
+              <span class="text-gray-400">{{ item.pct }}%</span>
+            </div>
+            <div class="h-2 bg-gray-100 rounded-full">
+              <div class="h-2 rounded-full bg-teal-rm" style="width: {{ item.pct }}%"></div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- RESUMEN EJECUTIVO -->
+    <div class="card p-6">
+      <h2 class="font-medium text-gray-900 mb-4">Resumen ejecutivo</h2>
+      <ul class="space-y-3 text-sm text-gray-600">
+        <li class="flex items-start gap-2">
+          <svg class="w-4 h-4 text-sand flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
+          <span><strong>Julio</strong> marca récord histórico con 15 eventos confirmados.</span>
+        </li>
+        <li class="flex items-start gap-2">
+          <svg class="w-4 h-4 text-teal-rm flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0"/></svg>
+          <span>Tendencia al alza en <strong>bodas</strong> (+34% YoY).</span>
+        </li>
+        <li class="flex items-start gap-2">
+          <svg class="w-4 h-4 text-coral flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+          <span>El <strong>Salón de Celebraciones</strong> opera bajo capacidad — considerar promociones.</span>
+        </li>
+        <li class="flex items-start gap-2">
+          <svg class="w-4 h-4 text-teal-rm flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+          <span>Paquete <strong>Premium</strong> es el más solicitado (61% de reservas).</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}
