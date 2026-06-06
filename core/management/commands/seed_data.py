@@ -176,7 +176,7 @@ class Command(BaseCommand):
     help = 'Pobla la base de datos con datos de ejemplo del PDF'
 
     def handle(self, *args, **options):
-        self.stdout.write('🌴 Creando datos de ejemplo...\n')
+        self.stdout.write('Creando datos de ejemplo...\n')
         self._crear_espacios()
         self._crear_paquetes()
         self._crear_servicios()
@@ -184,7 +184,7 @@ class Command(BaseCommand):
         self._crear_staff()
         self._crear_reservas()
         self._crear_tareas()
-        self.stdout.write(self.style.SUCCESS('\n✅  Seed completado. Puedes hacer login con:\n'))
+        self.stdout.write(self.style.SUCCESS('\nSeed completado. Puedes hacer login con:\n'))
         self.stdout.write('   Staff:   admin@rivieramaya.mx / admin123\n')
         self.stdout.write('   Cliente: sofia.mendoza@correo.com / cliente123\n')
 
