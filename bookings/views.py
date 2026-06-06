@@ -1,12 +1,13 @@
 from datetime import date
 from decimal import Decimal
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib import messages
 
 from venues.models import Espacio, Paquete, ServicioAdicional, FechaOcupada
-from .models import Reserva, ReservaServicio, ActividadReserva
+from .models import Reserva, ReservaServicio, ActividadReserva, PagoRegistro
 from .forms import Paso1Form, Paso2Form, Paso3Form, Paso4Form, Paso5Form, Paso6Form, Paso7Form
 
 
@@ -193,6 +194,8 @@ def paso_7(request):
             reserva = _crear_reserva(request, data, totales)
             if reserva:
                 del request.session[WIZARD_KEY]
+                if not request.user.is_authenticated:
+                    login(request, reserva.cliente, backend='django.contrib.backends.ModelBackend')
                 return redirect('bookings:confirmacion', codigo=reserva.codigo)
             messages.error(request, 'Hubo un error al procesar tu reserva. Intenta de nuevo.')
     else:
@@ -254,9 +257,17 @@ def _crear_reserva(request, data, totales):
             defaults={'motivo': 'reserva'}
         )
 
+        # Registrar el pago del anticipo
+        PagoRegistro.objects.create(
+            reserva=reserva,
+            monto=totales.get('anticipo', 0),
+            fecha_pago=date.today(),
+            concepto='anticipo',
+        )
+
         ActividadReserva.objects.create(
             reserva=reserva,
-            descripcion='Reserva creada · Anticipo del 25% recibido',
+            descripcion='Reserva creada · Anticipo del 25% recibido · Fecha bloqueada en disponibilidad',
         )
         return reserva
     except Exception:
