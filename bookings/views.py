@@ -1,3 +1,5 @@
+import secrets
+import string
 from datetime import date
 from decimal import Decimal
 from django.shortcuts import render, redirect, get_object_or_404
@@ -191,11 +193,14 @@ def paso_7(request):
     if request.method == 'POST':
         form = Paso7Form(request.POST)
         if form.is_valid():
-            reserva = _crear_reserva(request, data, totales)
-            if reserva:
+            resultado = _crear_reserva(request, data, totales)
+            if resultado:
+                reserva, password_generada = resultado
                 del request.session[WIZARD_KEY]
                 if not request.user.is_authenticated:
-                    login(request, reserva.cliente, backend='django.contrib.backends.ModelBackend')
+                    login(request, reserva.cliente, backend='django.contrib.auth.backends.ModelBackend')
+                if password_generada:
+                    request.session[f'pwd_{reserva.codigo}'] = password_generada
                 return redirect('bookings:confirmacion', codigo=reserva.codigo)
             messages.error(request, 'Hubo un error al procesar tu reserva. Intenta de nuevo.')
     else:
@@ -207,9 +212,15 @@ def paso_7(request):
     })
 
 
+def _generar_contrasena():
+    alphabet = string.ascii_letters + string.digits
+    return ''.join(secrets.choice(alphabet) for _ in range(10))
+
+
 def _crear_reserva(request, data, totales):
     try:
         email = data['email']
+        password_generada = None
         user, created = User.objects.get_or_create(
             username=email,
             defaults={
@@ -219,7 +230,8 @@ def _crear_reserva(request, data, totales):
             }
         )
         if created:
-            user.set_unusable_password()
+            password_generada = _generar_contrasena()
+            user.set_password(password_generada)
             user.save()
 
         from accounts.models import ClienteProfile
@@ -269,14 +281,18 @@ def _crear_reserva(request, data, totales):
             reserva=reserva,
             descripcion='Reserva creada · Anticipo del 25% recibido · Fecha bloqueada en disponibilidad',
         )
-        return reserva
+        return reserva, password_generada
     except Exception:
         return None
 
 
 def confirmacion(request, codigo):
     reserva = get_object_or_404(Reserva, codigo=codigo)
-    return render(request, 'bookings/confirmacion.html', {'reserva': reserva})
+    password_generada = request.session.pop(f'pwd_{reserva.codigo}', None)
+    return render(request, 'bookings/confirmacion.html', {
+        'reserva': reserva,
+        'password_generada': password_generada,
+    })
 
 
 # ──────────────────────────────────────────────────────────────
