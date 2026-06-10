@@ -1,41 +1,192 @@
 {% extends 'bookings/wizard/base_wizard.html' %}
 
 {% block wizard_content %}
-<h1 class="font-serif text-3xl text-gray-900 mb-2">Resumen y pago del anticipo</h1>
-<p class="text-gray-500 mb-8">Revisa los detalles y confirma tu reserva con el anticipo del 25%.</p>
+<h1 class="font-serif text-3xl text-gray-900 mb-2">Pago del anticipo</h1>
+<p class="text-gray-500 mb-8">Ingresa los datos de tu tarjeta para confirmar el anticipo del 25%.</p>
 
-{% if total %}
-<div class="bg-rm-dark rounded-2xl p-6 text-white mb-8">
-  <div class="grid md:grid-cols-2 gap-4 text-sm">
-    {% if espacio_obj %}<div><p class="text-gray-400 text-xs uppercase tracking-wider">Espacio</p><p class="font-medium">{{ espacio_obj.nombre }}</p></div>{% endif %}
-    {% if paquete_obj %}<div><p class="text-gray-400 text-xs uppercase tracking-wider">Paquete</p><p class="font-medium">{{ paquete_obj.get_nombre_display }}</p></div>{% endif %}
-    {% if wizard_data.fecha %}<div><p class="text-gray-400 text-xs uppercase tracking-wider">Fecha</p><p class="font-medium">{{ wizard_data.fecha }}</p></div>{% endif %}
-    {% if wizard_data.num_invitados %}<div><p class="text-gray-400 text-xs uppercase tracking-wider">Invitados</p><p class="font-medium">{{ wizard_data.num_invitados }}</p></div>{% endif %}
+{% if anticipo %}
+<div class="bg-rm-dark rounded-2xl p-5 text-white mb-8 flex flex-wrap justify-between items-center gap-4">
+  <div>
+    <p class="text-gray-400 text-xs uppercase tracking-wider">Anticipo a cobrar (25%)</p>
+    <p class="text-3xl font-semibold">${{ anticipo|floatformat:0 }}</p>
   </div>
-  <hr class="border-gray-700 my-4">
-  <div class="flex justify-between text-2xl font-semibold">
-    <span>Total del evento</span>
-    <span>${{ total|floatformat:0 }}</span>
-  </div>
-  <div class="flex justify-between text-sand mt-1">
-    <span class="text-sm">Anticipo a pagar (25%)</span>
-    <span class="text-lg font-semibold">${{ anticipo|floatformat:0 }}</span>
+  <div class="text-right">
+    <p class="text-gray-400 text-xs uppercase tracking-wider">Total del evento</p>
+    <p class="text-xl font-medium">${{ total|floatformat:0 }}</p>
+    <p class="text-gray-400 text-xs mt-1">Saldo: ${{ total|floatformat:0 }} — se liquida 15 días antes</p>
   </div>
 </div>
 {% endif %}
 
-<form method="post" id="paso-form">
+{% if messages %}
+  {% for msg in messages %}
+    <div class="bg-red-50 border border-red-200 text-red-700 rounded-xl p-4 mb-6 text-sm">{{ msg }}</div>
+  {% endfor %}
+{% endif %}
+
+<!-- Tarjeta visual -->
+<div class="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-6 text-white mb-6 shadow-lg relative overflow-hidden select-none">
+  <div class="absolute -top-4 -right-4 opacity-20">
+    <svg width="120" height="120" viewBox="0 0 24 24" fill="white"><circle cx="8" cy="12" r="7"/><circle cx="16" cy="12" r="7" opacity="0.7"/></svg>
+  </div>
+  <p class="text-gray-400 text-xs uppercase tracking-widest mb-5">Tarjeta de pago</p>
+  <p id="card-number-display" class="text-xl font-mono tracking-widest mb-6 transition-all">•••• •••• •••• ••••</p>
+  <div class="flex justify-between items-end">
+    <div>
+      <p class="text-gray-400 text-xs uppercase tracking-wider">Titular</p>
+      <p id="card-name-display" class="font-medium uppercase text-sm mt-0.5 tracking-wide">NOMBRE TITULAR</p>
+    </div>
+    <div class="text-right">
+      <p class="text-gray-400 text-xs uppercase tracking-wider">Vence</p>
+      <p id="card-expiry-display" class="font-medium text-sm mt-0.5">MM/AA</p>
+    </div>
+  </div>
+</div>
+
+<form method="post" id="paso-form" novalidate>
   {% csrf_token %}
-  <label class="flex items-start gap-3 cursor-pointer">
-    <input type="checkbox" name="aceptar_terminos" required class="w-4 h-4 mt-0.5 accent-[#C9A96E]">
-    <span class="text-sm text-gray-600">Acepto los términos y condiciones. Entiendo que el anticipo del 25% es para reservar la fecha y que el saldo se liquida 15 días antes del evento.</span>
-  </label>
+
+  <div class="space-y-4">
+
+    <!-- Número de tarjeta -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1" for="id_numero_tarjeta">
+        Número de tarjeta
+      </label>
+      <input
+        type="text"
+        name="numero_tarjeta"
+        id="id_numero_tarjeta"
+        placeholder="1234567890123456"
+        maxlength="16"
+        inputmode="numeric"
+        autocomplete="cc-number"
+        value="{{ form.numero_tarjeta.value|default:'' }}"
+        class="w-full border {% if form.numero_tarjeta.errors %}border-red-400 bg-red-50{% else %}border-gray-300{% endif %} rounded-xl px-4 py-3 font-mono text-lg focus:ring-2 focus:ring-[#C9A96E] focus:border-transparent outline-none transition"
+      >
+      {% if form.numero_tarjeta.errors %}
+        <p class="text-red-600 text-xs mt-1">{{ form.numero_tarjeta.errors.0 }}</p>
+      {% endif %}
+    </div>
+
+    <!-- Nombre del titular -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1" for="id_nombre_titular">
+        Nombre del titular
+      </label>
+      <input
+        type="text"
+        name="nombre_titular"
+        id="id_nombre_titular"
+        placeholder="Como aparece en la tarjeta"
+        maxlength="100"
+        autocomplete="cc-name"
+        value="{{ form.nombre_titular.value|default:'' }}"
+        class="w-full border {% if form.nombre_titular.errors %}border-red-400 bg-red-50{% else %}border-gray-300{% endif %} rounded-xl px-4 py-3 uppercase tracking-wide focus:ring-2 focus:ring-[#C9A96E] focus:border-transparent outline-none transition"
+      >
+      {% if form.nombre_titular.errors %}
+        <p class="text-red-600 text-xs mt-1">{{ form.nombre_titular.errors.0 }}</p>
+      {% endif %}
+    </div>
+
+    <!-- Vencimiento + CVV -->
+    <div class="grid grid-cols-2 gap-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1" for="id_fecha_vencimiento">
+          Vencimiento
+        </label>
+        <input
+          type="text"
+          name="fecha_vencimiento"
+          id="id_fecha_vencimiento"
+          placeholder="MM/AA"
+          maxlength="5"
+          inputmode="numeric"
+          autocomplete="cc-exp"
+          value="{{ form.fecha_vencimiento.value|default:'' }}"
+          class="w-full border {% if form.fecha_vencimiento.errors %}border-red-400 bg-red-50{% else %}border-gray-300{% endif %} rounded-xl px-4 py-3 font-mono text-center text-lg focus:ring-2 focus:ring-[#C9A96E] focus:border-transparent outline-none transition"
+        >
+        {% if form.fecha_vencimiento.errors %}
+          <p class="text-red-600 text-xs mt-1">{{ form.fecha_vencimiento.errors.0 }}</p>
+        {% endif %}
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1" for="id_cvv">
+          CVV
+        </label>
+        <input
+          type="password"
+          name="cvv"
+          id="id_cvv"
+          placeholder="•••"
+          maxlength="3"
+          inputmode="numeric"
+          autocomplete="cc-csc"
+          class="w-full border {% if form.cvv.errors %}border-red-400 bg-red-50{% else %}border-gray-300{% endif %} rounded-xl px-4 py-3 font-mono text-center text-lg focus:ring-2 focus:ring-[#C9A96E] focus:border-transparent outline-none transition"
+        >
+        {% if form.cvv.errors %}
+          <p class="text-red-600 text-xs mt-1">{{ form.cvv.errors.0 }}</p>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Términos -->
+  <div class="mt-6 pt-6 border-t border-gray-100">
+    <label class="flex items-start gap-3 cursor-pointer">
+      <input type="checkbox" name="aceptar_terminos" class="w-4 h-4 mt-0.5 accent-[#C9A96E] flex-shrink-0">
+      <span class="text-sm text-gray-600">Acepto los términos y condiciones. Entiendo que el anticipo del 25% es para reservar la fecha y que el saldo se liquida 15 días antes del evento.</span>
+    </label>
+    {% if form.aceptar_terminos.errors %}
+      <p class="text-red-600 text-xs mt-2">{{ form.aceptar_terminos.errors.0 }}</p>
+    {% endif %}
+  </div>
+
 </form>
 {% endblock %}
 
 {% block wizard_next %}
   <button type="submit" form="paso-form" class="btn-primary flex items-center gap-2">
-    Confirmar reserva
-    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+    </svg>
+    Pagar anticipo ${{ anticipo|floatformat:0 }}
   </button>
+{% endblock %}
+
+{% block wizard_js %}
+<script>
+  const numInput     = document.getElementById('id_numero_tarjeta');
+  const nameInput    = document.getElementById('id_nombre_titular');
+  const expiryInput  = document.getElementById('id_fecha_vencimiento');
+  const cvvInput     = document.getElementById('id_cvv');
+
+  const numDisplay    = document.getElementById('card-number-display');
+  const nameDisplay   = document.getElementById('card-name-display');
+  const expiryDisplay = document.getElementById('card-expiry-display');
+
+  numInput.addEventListener('input', function () {
+    this.value = this.value.replace(/\D/g, '').slice(0, 16);
+    const padded = this.value.padEnd(16, '•');
+    numDisplay.textContent = padded.match(/.{1,4}/g).join(' ');
+  });
+
+  nameInput.addEventListener('input', function () {
+    this.value = this.value.replace(/[^a-zA-ZÀ-ÿ\s]/g, '');
+    nameDisplay.textContent = this.value.trim().toUpperCase() || 'NOMBRE TITULAR';
+  });
+
+  expiryInput.addEventListener('input', function () {
+    this.value = this.value.replace(/[^\d]/g, '').slice(0, 4);
+    if (this.value.length >= 2) {
+      this.value = this.value.slice(0, 2) + '/' + this.value.slice(2);
+    }
+    expiryDisplay.textContent = this.value || 'MM/AA';
+  });
+
+  cvvInput.addEventListener('input', function () {
+    this.value = this.value.replace(/\D/g, '').slice(0, 3);
+  });
+</script>
 {% endblock %}
