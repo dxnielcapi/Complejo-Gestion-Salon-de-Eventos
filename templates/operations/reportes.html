@@ -12,8 +12,8 @@
     <div class="flex gap-2 items-center">
       <form method="get">
         <select name="anio" onchange="this.form.submit()" class="form-input text-sm py-2">
-          {% for y in "2024 2025 2026 2027"|split:" " %}
-            <option value="{{ y }}" {% if anio|stringformat:"d" == y %}selected{% endif %}>{{ y }}</option>
+          {% for y in years %}
+            <option value="{{ y }}" {% if anio == y %}selected{% endif %}>{{ y }}</option>
           {% endfor %}
         </select>
       </form>

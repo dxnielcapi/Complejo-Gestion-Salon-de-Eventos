@@ -309,6 +309,8 @@ def reportes(request):
 
     return render(request, 'operations/reportes.html', {
         'anio': anio,
+        'anio_anterior': anio - 1,
+        'years': list(range(2024, date.today().year + 3)),
         'ingresos_anio': ingresos_anio,
         'eventos_celebrados': eventos_celebrados,
         'ticket_promedio': ticket_promedio,
@@ -319,7 +321,6 @@ def reportes(request):
         'tipo_mix': tipo_mix,
         'top_espacios': top_espacios,
         'resumen': resumen,
-        'anio_anterior': anio - 1,
     })
 
 
