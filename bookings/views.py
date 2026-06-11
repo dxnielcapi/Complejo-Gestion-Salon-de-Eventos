@@ -10,7 +10,7 @@ from django.contrib import messages
 
 from venues.models import Espacio, Paquete, ServicioAdicional, FechaOcupada
 from .models import Reserva, ReservaServicio, ActividadReserva, PagoRegistro
-from .forms import Paso1Form, Paso2Form, Paso3Form, Paso4Form, Paso5Form, Paso6Form, Paso7Form
+from .forms import Paso1Form, Paso2Form, Paso3Form, Paso4Form, Paso5Form, Paso6Form, Paso7Form, LiquidacionForm
 
 
 # ──────────────────────────────────────────────────────────────
@@ -335,3 +335,40 @@ def mis_reservas(request):
 def detalle_cliente(request, codigo):
     reserva = get_object_or_404(Reserva, codigo=codigo, cliente=request.user)
     return render(request, 'portal/detalle_cliente.html', {'reserva': reserva})
+
+
+@login_required
+def liquidar_reserva(request, codigo):
+    reserva = get_object_or_404(Reserva, codigo=codigo, cliente=request.user)
+    if reserva.saldo_pendiente <= 0 or reserva.estado == 'completada':
+        messages.info(request, 'Esta reserva ya está completamente liquidada.')
+        return redirect('bookings:detalle_cliente', codigo=codigo)
+    if request.method == 'POST':
+        form = LiquidacionForm(request.POST)
+        if form.is_valid():
+            saldo = reserva.saldo_pendiente
+            PagoRegistro.objects.create(
+                reserva=reserva,
+                monto=saldo,
+                fecha_pago=date.today(),
+                concepto='liquidacion',
+            )
+            reserva.anticipo_pagado = reserva.total_evento
+            reserva.estado = 'completada'
+            reserva.save()
+            ActividadReserva.objects.create(
+                reserva=reserva,
+                descripcion=f'Liquidación completa · ${saldo:,.0f} recibidos · Reserva completada',
+                usuario=request.user,
+            )
+            messages.success(request, '¡Pago realizado exitosamente! Tu reserva está completamente liquidada.')
+            return redirect('bookings:detalle_cliente', codigo=codigo)
+    else:
+        form = LiquidacionForm()
+    return render(request, 'bookings/liquidacion.html', {'form': form, 'reserva': reserva})
+
+
+@login_required
+def ver_contrato(request, codigo):
+    reserva = get_object_or_404(Reserva, codigo=codigo, cliente=request.user)
+    return render(request, 'bookings/contrato.html', {'reserva': reserva})

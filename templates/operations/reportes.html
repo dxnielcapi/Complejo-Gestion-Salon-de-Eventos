@@ -17,34 +17,47 @@
           {% endfor %}
         </select>
       </form>
-      <button class="btn-secondary text-sm py-2 flex items-center gap-2">
+      <a href="{% url 'operations:reportes_csv' %}?anio={{ anio }}" class="btn-secondary text-sm py-2 flex items-center gap-2">
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-        Descargar PDF
-      </button>
+        Exportar CSV
+      </a>
     </div>
   </div>
 
   <!-- KPIs -->
-  <div class="grid md:grid-cols-4 gap-4 mb-8">
+  <div class="grid md:grid-cols-3 gap-4 mb-8">
     <div class="card p-5">
       <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Ingresos del año</p>
       <p class="font-serif text-3xl text-gray-900">${{ ingresos_anio|floatformat:0 }}</p>
-      <p class="text-xs text-green-500 mt-1">↑ 34% vs año anterior</p>
+      {% if pct_ingresos is not None %}
+        <p class="text-xs mt-1 {% if pct_ingresos >= 0 %}text-green-500{% else %}text-red-500{% endif %}">
+          {% if pct_ingresos >= 0 %}↑{% else %}↓{% endif %} {{ pct_ingresos|stringformat:"+d" }}% vs {{ anio_anterior }}
+        </p>
+      {% else %}
+        <p class="text-xs text-gray-400 mt-1">Sin datos del año anterior</p>
+      {% endif %}
     </div>
     <div class="card p-5">
-      <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Eventos celebrados</p>
+      <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Eventos completados</p>
       <p class="font-serif text-4xl text-gray-900">{{ eventos_celebrados }}</p>
-      <p class="text-xs text-green-500 mt-1">↑ 18% vs año anterior</p>
+      {% if pct_eventos is not None %}
+        <p class="text-xs mt-1 {% if pct_eventos >= 0 %}text-green-500{% else %}text-red-500{% endif %}">
+          {% if pct_eventos >= 0 %}↑{% else %}↓{% endif %} {{ pct_eventos|stringformat:"+d" }}% vs {{ anio_anterior }}
+        </p>
+      {% else %}
+        <p class="text-xs text-gray-400 mt-1">Sin datos del año anterior</p>
+      {% endif %}
     </div>
     <div class="card p-5">
       <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Ticket promedio</p>
       <p class="font-serif text-3xl text-gray-900">${{ ticket_promedio|floatformat:0 }}</p>
-      <p class="text-xs text-green-500 mt-1">↑ 9% vs año anterior</p>
-    </div>
-    <div class="card p-5">
-      <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">NPS Clientes</p>
-      <p class="font-serif text-4xl text-gray-900">{{ nps }}</p>
-      <p class="text-xs text-green-500 mt-1">↑ 4 pts vs año anterior</p>
+      {% if pct_ticket is not None %}
+        <p class="text-xs mt-1 {% if pct_ticket >= 0 %}text-green-500{% else %}text-red-500{% endif %}">
+          {% if pct_ticket >= 0 %}↑{% else %}↓{% endif %} {{ pct_ticket|stringformat:"+d" }}% vs {{ anio_anterior }}
+        </p>
+      {% else %}
+        <p class="text-xs text-gray-400 mt-1">Sin datos del año anterior</p>
+      {% endif %}
     </div>
   </div>
 
@@ -114,24 +127,24 @@
     <!-- RESUMEN EJECUTIVO -->
     <div class="card p-6">
       <h2 class="font-medium text-gray-900 mb-4">Resumen ejecutivo</h2>
-      <ul class="space-y-3 text-sm text-gray-600">
-        <li class="flex items-start gap-2">
-          <svg class="w-4 h-4 text-sand flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
-          <span><strong>Julio</strong> marca récord histórico con 15 eventos confirmados.</span>
-        </li>
-        <li class="flex items-start gap-2">
-          <svg class="w-4 h-4 text-teal-rm flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0"/></svg>
-          <span>Tendencia al alza en <strong>bodas</strong> (+34% YoY).</span>
-        </li>
-        <li class="flex items-start gap-2">
-          <svg class="w-4 h-4 text-coral flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-          <span>El <strong>Salón de Celebraciones</strong> opera bajo capacidad — considerar promociones.</span>
-        </li>
-        <li class="flex items-start gap-2">
-          <svg class="w-4 h-4 text-teal-rm flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
-          <span>Paquete <strong>Premium</strong> es el más solicitado (61% de reservas).</span>
-        </li>
-      </ul>
+      {% if resumen %}
+        <ul class="space-y-3 text-sm text-gray-600">
+          {% for item in resumen %}
+            <li class="flex items-start gap-2">
+              {% if item.color == 'sand' %}
+                <svg class="w-4 h-4 text-sand flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
+              {% elif item.color == 'coral' %}
+                <svg class="w-4 h-4 text-coral flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+              {% else %}
+                <svg class="w-4 h-4 text-teal-rm flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+              {% endif %}
+              <span>{{ item.texto|safe }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="text-sm text-gray-400">No hay suficientes datos para generar el resumen de {{ anio }}.</p>
+      {% endif %}
     </div>
   </div>
 </div>
