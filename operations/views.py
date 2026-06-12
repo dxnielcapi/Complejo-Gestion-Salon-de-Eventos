@@ -263,6 +263,7 @@ def reportes(request):
 
     return render(request, 'operations/reportes.html', {
         'anio': anio,
+        'anos': [2024, 2025, 2026, 2027],
         'ingresos_anio': ingresos_anio,
         'eventos_celebrados': eventos_celebrados,
         'ticket_promedio': ticket_promedio,
