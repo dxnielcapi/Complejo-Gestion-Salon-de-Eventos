@@ -10,4 +10,5 @@ urlpatterns = [
     path('reservas/<str:codigo>/', views.reservas_detalle, name='reservas_detalle'),
     path('catalogo/', views.catalogo_ops, name='catalogo'),
     path('reportes/', views.reportes, name='reportes'),
+    path('reportes/csv/', views.reportes_csv, name='reportes_csv'),
 ]

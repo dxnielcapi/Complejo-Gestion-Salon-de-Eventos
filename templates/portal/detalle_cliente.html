@@ -113,18 +113,42 @@
             <dt>Anticipo pagado</dt><dd>${{ reserva.anticipo_pagado|floatformat:0 }}</dd>
           </div>
           <hr class="border-gray-100">
-          <div class="flex justify-between text-coral font-semibold">
-            <dt>Saldo por pagar</dt><dd>${{ reserva.saldo_pendiente|floatformat:0 }}</dd>
-          </div>
+          {% if reserva.estado == 'completada' %}
+            <div class="flex justify-between text-teal-rm font-semibold">
+              <dt>Estado</dt><dd>Liquidado al 100%</dd>
+            </div>
+          {% else %}
+            <div class="flex justify-between text-coral font-semibold">
+              <dt>Saldo por pagar</dt><dd>${{ reserva.saldo_pendiente|floatformat:0 }}</dd>
+            </div>
+          {% endif %}
         </dl>
-        <p class="text-xs text-gray-400 mt-3 flex items-center gap-1">
-          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-          Liquidar antes del {{ reserva.fecha|date:"d M Y" }}
-        </p>
-        <button class="btn-primary w-full mt-4 flex items-center justify-center gap-2">
-          Pagar saldo ahora
-          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-        </button>
+        {% if reserva.estado != 'completada' and reserva.saldo_pendiente > 0 %}
+          <p class="text-xs text-gray-400 mt-3 flex items-center gap-1">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            Liquidar antes del {{ reserva.fecha|date:"d M Y" }}
+          </p>
+          <a href="{% url 'bookings:liquidar_reserva' reserva.codigo %}" class="btn-primary w-full mt-4 flex items-center justify-center gap-2">
+            Pagar saldo ahora
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+          </a>
+        {% else %}
+          <div class="mt-4 flex items-center justify-center gap-2 text-teal-rm text-sm font-medium py-2">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            Reserva totalmente liquidada
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- CONTRATO -->
+      <div class="card p-6">
+        <h3 class="font-medium text-gray-900 mb-3">Documento contractual</h3>
+        <p class="text-xs text-gray-400 mb-4">Accede al contrato de servicios que ampara tu evento con todos los términos acordados.</p>
+        <a href="{% url 'bookings:ver_contrato' reserva.codigo %}" target="_blank"
+           class="btn-secondary w-full flex items-center justify-center gap-2 text-sm">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          Ver / Imprimir contrato
+        </a>
       </div>
 
       <!-- COORDINADOR -->

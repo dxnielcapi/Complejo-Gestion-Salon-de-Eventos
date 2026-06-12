@@ -1,8 +1,10 @@
+import csv
 from datetime import date, timedelta
 from decimal import Decimal
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models import Sum, Count, Q
+from django.http import HttpResponse
 
 from bookings.models import Reserva, PagoRegistro, ActividadReserva
 from venues.models import Espacio, Paquete, ServicioAdicional, FechaOcupada
@@ -232,43 +234,134 @@ def catalogo_ops(request):
 def reportes(request):
     anio = int(request.GET.get('anio', date.today().year))
     reservas_anio = Reserva.objects.filter(fecha__year=anio)
+    reservas_anterior = Reserva.objects.filter(fecha__year=anio - 1)
 
-    ingresos_anio = reservas_anio.aggregate(t=Sum('total_evento'))['t'] or 0
+    ingresos_anio = reservas_anio.aggregate(t=Sum('total_evento'))['t'] or Decimal('0')
     eventos_celebrados = reservas_anio.filter(estado='completada').count()
-    ticket_promedio = (ingresos_anio / eventos_celebrados) if eventos_celebrados else 0
+    ticket_promedio = (ingresos_anio / eventos_celebrados) if eventos_celebrados else Decimal('0')
+
+    ingresos_anterior = reservas_anterior.aggregate(t=Sum('total_evento'))['t'] or Decimal('0')
+    eventos_anterior = reservas_anterior.filter(estado='completada').count()
+    ticket_anterior = (ingresos_anterior / eventos_anterior) if eventos_anterior else Decimal('0')
+
+    def pct_change(curr, prev):
+        if prev and prev > 0:
+            return round(float((curr - prev) / prev * 100))
+        return None
+
+    pct_ingresos = pct_change(ingresos_anio, ingresos_anterior)
+    pct_eventos = pct_change(eventos_celebrados, eventos_anterior)
+    pct_ticket = pct_change(ticket_promedio, ticket_anterior)
 
     # Ingresos por mes
-    ingresos_mes = []
     meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
+    ingresos_mes = []
     for m in range(1, 13):
         total = reservas_anio.filter(fecha__month=m).aggregate(t=Sum('total_evento'))['t'] or 0
-        ingresos_mes.append({'mes': meses[m - 1], 'total': float(total)})
+        ingresos_mes.append({'mes': meses[m - 1], 'total': float(total), 'num': m})
 
     # Mix por tipo
+    total_all = reservas_anio.count() or 1
     tipo_mix = []
     for choice_val, choice_label in Reserva.TIPO_EVENTO_CHOICES:
         count = reservas_anio.filter(tipo_evento=choice_val).count()
-        tipo_mix.append({'tipo': choice_label, 'count': count})
+        tipo_mix.append({'tipo': choice_label, 'valor': choice_val, 'count': count, 'pct': round(count / total_all * 100)})
+    tipo_mix.sort(key=lambda x: x['count'], reverse=True)
 
     # Top espacios
-    top_espacios = []
     total_ev = reservas_anio.count() or 1
+    top_espacios = []
     for esp in Espacio.objects.filter(estado='publicado').order_by('orden'):
         count = reservas_anio.filter(espacio=esp).count()
-        top_espacios.append({
-            'espacio': esp,
-            'count': count,
-            'pct': round(count / total_ev * 100),
+        top_espacios.append({'espacio': esp, 'count': count, 'pct': round(count / total_ev * 100)})
+    top_espacios.sort(key=lambda x: x['count'], reverse=True)
+
+    # Resumen ejecutivo dinámico
+    resumen = []
+    mejor_mes = max(ingresos_mes, key=lambda x: x['total'], default=None)
+    if mejor_mes and mejor_mes['total'] > 0:
+        resumen.append({
+            'color': 'sand',
+            'texto': f"<strong>{mejor_mes['mes']}</strong> es el mes con más ingresos del año (${mejor_mes['total']:,.0f}).",
         })
+    tipo_top = next((t for t in tipo_mix if t['count'] > 0), None)
+    if tipo_top:
+        resumen.append({
+            'color': 'teal',
+            'texto': f"<strong>{tipo_top['tipo']}</strong> lidera el mix de eventos con {tipo_top['pct']}% del total.",
+        })
+    for paquete in Paquete.objects.all():
+        cnt = reservas_anio.filter(paquete=paquete).count()
+        if cnt > 0:
+            pct = round(cnt / total_ev * 100)
+            resumen.append({
+                'color': 'teal',
+                'texto': f"Paquete <strong>{paquete.get_nombre_display()}</strong> es el más solicitado ({pct}% de reservas).",
+            })
+            break
+    if top_espacios:
+        peor = min(top_espacios, key=lambda x: x['count'])
+        if peor['pct'] < 15:
+            resumen.append({
+                'color': 'coral',
+                'texto': f"<strong>{peor['espacio'].nombre}</strong> opera por debajo del promedio ({peor['pct']}%) — considera revisar precios o promociones.",
+            })
 
     return render(request, 'operations/reportes.html', {
         'anio': anio,
-        'anos': [2024, 2025, 2026, 2027],
+        'anio_anterior': anio - 1,
+        'years': list(range(2024, date.today().year + 3)),
         'ingresos_anio': ingresos_anio,
         'eventos_celebrados': eventos_celebrados,
         'ticket_promedio': ticket_promedio,
-        'nps': 76,
+        'pct_ingresos': pct_ingresos,
+        'pct_eventos': pct_eventos,
+        'pct_ticket': pct_ticket,
         'ingresos_mes': ingresos_mes,
         'tipo_mix': tipo_mix,
         'top_espacios': top_espacios,
+        'resumen': resumen,
     })
+
+
+@staff_member_required(login_url='/accounts/login/')
+def reportes_csv(request):
+    anio = int(request.GET.get('anio', date.today().year))
+    reservas = Reserva.objects.filter(fecha__year=anio).select_related(
+        'cliente', 'espacio', 'paquete'
+    ).order_by('fecha')
+
+    response = HttpResponse(content_type='text/csv; charset=utf-8')
+    response['Content-Disposition'] = f'attachment; filename="reporte_{anio}.csv"'
+    response.write('﻿')  # BOM para Excel
+
+    writer = csv.writer(response)
+    writer.writerow([
+        'Código', 'Cliente', 'Email', 'Teléfono',
+        'Tipo Evento', 'Espacio', 'Paquete',
+        'Fecha', 'Hora', 'Invitados',
+        'Total', 'Anticipo Pagado', 'Saldo Pendiente', 'Estado',
+    ])
+    for r in reservas:
+        telefono = ''
+        try:
+            telefono = r.cliente.clienteprofile.telefono
+        except Exception:
+            pass
+        writer.writerow([
+            r.codigo,
+            r.cliente.get_full_name(),
+            r.cliente.email,
+            telefono,
+            r.get_tipo_evento_display(),
+            r.espacio.nombre,
+            r.paquete.get_nombre_display(),
+            r.fecha.strftime('%d/%m/%Y'),
+            r.hora_inicio.strftime('%H:%M'),
+            r.num_invitados,
+            r.total_evento,
+            r.anticipo_pagado,
+            r.saldo_pendiente,
+            r.get_estado_display(),
+        ])
+    return response
