@@ -14,4 +14,6 @@ urlpatterns = [
     path('cotizar/confirmacion/<str:codigo>/', views.confirmacion, name='confirmacion'),
     path('portal/reservas/', views.mis_reservas, name='mis_reservas'),
     path('portal/reservas/<str:codigo>/', views.detalle_cliente, name='detalle_cliente'),
+    path('portal/reservas/<str:codigo>/liquidar/', views.liquidar_reserva, name='liquidar_reserva'),
+    path('portal/reservas/<str:codigo>/contrato/', views.ver_contrato, name='ver_contrato'),
 ]

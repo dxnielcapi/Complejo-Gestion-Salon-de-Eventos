@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contrato de Servicio · {{ reserva.codigo }}</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Georgia', serif;
+      color: #1a1a1a;
+      background: #fff;
+      padding: 0;
+    }
+    .page {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 48px 48px 64px;
+    }
+    /* Barra de acciones (solo en pantalla) */
+    .actions-bar {
+      background: #1a2e2a;
+      color: #fff;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .actions-bar a, .actions-bar button {
+      font-family: sans-serif;
+      font-size: 13px;
+      color: #fff;
+      text-decoration: none;
+      background: none;
+      border: 1px solid rgba(255,255,255,0.3);
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .actions-bar button.print-btn {
+      background: #C9A96E;
+      border-color: #C9A96E;
+      color: #fff;
+      font-weight: 600;
+    }
+    .actions-bar span { font-family: sans-serif; font-size: 13px; opacity: 0.7; }
+
+    /* Encabezado del contrato */
+    .header {
+      text-align: center;
+      border-bottom: 3px double #C9A96E;
+      padding-bottom: 24px;
+      margin-bottom: 32px;
+    }
+    .header .company { font-size: 22px; font-weight: bold; letter-spacing: 2px; text-transform: uppercase; color: #1a2e2a; }
+    .header .subtitle { font-size: 12px; color: #888; letter-spacing: 1px; margin-top: 4px; font-family: sans-serif; }
+    .header .doc-title { font-size: 18px; margin-top: 16px; color: #1a2e2a; font-variant: small-caps; letter-spacing: 1px; }
+    .header .doc-num { font-family: monospace; font-size: 14px; color: #C9A96E; margin-top: 4px; }
+
+    /* Secciones */
+    h2 {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #C9A96E;
+      border-bottom: 1px solid #e8ddd0;
+      padding-bottom: 6px;
+      margin-bottom: 14px;
+      margin-top: 28px;
+      font-family: sans-serif;
+    }
+    p { font-size: 13.5px; line-height: 1.8; color: #333; margin-bottom: 8px; }
+    .field-row { display: flex; gap: 8px; margin-bottom: 8px; font-size: 13.5px; }
+    .field-label { font-weight: bold; min-width: 160px; color: #555; font-family: sans-serif; }
+    .field-value { color: #1a1a1a; }
+
+    /* Tabla de servicios */
+    table { width: 100%; border-collapse: collapse; margin-bottom: 8px; font-size: 13px; }
+    thead th { background: #f5f0e8; text-align: left; padding: 7px 10px; font-family: sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; color: #666; }
+    tbody td { padding: 7px 10px; border-bottom: 1px solid #f0ebe1; color: #333; }
+    .text-right { text-align: right; }
+    .total-row td { font-weight: bold; border-top: 2px solid #C9A96E; padding-top: 10px; }
+
+    /* Condiciones */
+    ol { padding-left: 20px; }
+    ol li { font-size: 13px; line-height: 1.8; color: #444; margin-bottom: 6px; }
+
+    /* Firmas */
+    .firmas {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      margin-top: 48px;
+    }
+    .firma-box { text-align: center; }
+    .firma-linea { border-top: 1px solid #333; margin-bottom: 8px; padding-top: 8px; }
+    .firma-nombre { font-size: 13px; font-weight: bold; }
+    .firma-rol { font-size: 11px; color: #888; font-family: sans-serif; }
+
+    /* Pie del documento */
+    .footer-doc {
+      text-align: center;
+      margin-top: 48px;
+      padding-top: 16px;
+      border-top: 1px solid #e0d8cd;
+      font-size: 11px;
+      color: #999;
+      font-family: sans-serif;
+    }
+
+    @media print {
+      .actions-bar { display: none !important; }
+      body { padding: 0; }
+      .page { padding: 32px 40px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Barra acciones (no imprime) -->
+<div class="actions-bar">
+  <a href="{% url 'bookings:detalle_cliente' reserva.codigo %}">← Volver a mi reserva</a>
+  <span>CONTRATO · {{ reserva.codigo }}</span>
+  <button class="print-btn" onclick="window.print()">Imprimir / Guardar PDF</button>
+</div>
+
+<div class="page">
+  <!-- Encabezado -->
+  <div class="header">
+    <div class="company">Complejo Riviera Maya</div>
+    <div class="subtitle">Salón de Eventos · Servicios de Celebraciones</div>
+    <div class="doc-title">Contrato de Prestación de Servicios para Evento</div>
+    <div class="doc-num">Folio: {{ reserva.codigo }} · Emitido: {{ reserva.created_at|date:"d \d\e F \d\e Y" }}</div>
+  </div>
+
+  <!-- Partes -->
+  <h2>I. Partes del Contrato</h2>
+  <p>El presente contrato se celebra entre:</p>
+  <p><strong>PRESTADOR DE SERVICIOS:</strong> Complejo Riviera Maya S.A. de C.V., en adelante denominado "El Complejo".</p>
+  <p><strong>CLIENTE:</strong> {{ reserva.cliente.get_full_name }}, con correo electrónico {{ reserva.cliente.email }}, en adelante denominado "El Cliente".</p>
+
+  <!-- Datos del Evento -->
+  <h2>II. Datos del Evento</h2>
+  <div class="field-row"><span class="field-label">Tipo de evento:</span><span class="field-value">{{ reserva.get_tipo_evento_display }}</span></div>
+  <div class="field-row"><span class="field-label">Fecha del evento:</span><span class="field-value">{{ reserva.fecha|date:"l, d \d\e F \d\e Y" }}</span></div>
+  <div class="field-row"><span class="field-label">Hora de inicio:</span><span class="field-value">{{ reserva.hora_inicio|time:"H:i" }} horas</span></div>
+  <div class="field-row"><span class="field-label">Espacio contratado:</span><span class="field-value">{{ reserva.espacio.nombre }} ({{ reserva.espacio.get_tipo_display }})</span></div>
+  <div class="field-row"><span class="field-label">Número de invitados:</span><span class="field-value">{{ reserva.num_invitados }} personas</span></div>
+  <div class="field-row"><span class="field-label">Paquete seleccionado:</span><span class="field-value">{{ reserva.paquete.get_nombre_display }} · {{ reserva.paquete.duracion_horas }} horas de evento</span></div>
+
+  <!-- Servicios incluidos -->
+  <h2>III. Descripción de Servicios</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Concepto</th>
+        <th class="text-right">Importe</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Renta del espacio · {{ reserva.espacio.nombre }}</td>
+        <td class="text-right">${{ reserva.espacio.precio_base|floatformat:0 }}</td>
+      </tr>
+      <tr>
+        <td>Paquete {{ reserva.paquete.get_nombre_display }} · {{ reserva.num_invitados }} personas × ${{ reserva.paquete.precio_por_persona|floatformat:0 }}/p</td>
+        <td class="text-right">${{ reserva.paquete.precio_por_persona|floatformat:0 }}</td>
+      </tr>
+      {% for rs in reserva.servicios.all %}
+      <tr>
+        <td>{{ rs.servicio.nombre }}{% if rs.servicio.precio_tipo == 'por_persona' %} (por persona){% endif %}</td>
+        <td class="text-right">${{ rs.servicio.precio|floatformat:0 }}</td>
+      </tr>
+      {% endfor %}
+      <tr class="total-row">
+        <td><strong>Total del evento</strong></td>
+        <td class="text-right"><strong>${{ reserva.total_evento|floatformat:0 }}</strong></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Condiciones de pago -->
+  <h2>IV. Condiciones de Pago</h2>
+  <table>
+    <thead>
+      <tr><th>Concepto</th><th>Monto</th><th>Estado</th></tr>
+    </thead>
+    <tbody>
+      {% for pago in reserva.pagos.all %}
+      <tr>
+        <td>{{ pago.get_concepto_display }} · {{ pago.fecha_pago|date:"d M Y" }}</td>
+        <td>${{ pago.monto|floatformat:0 }}</td>
+        <td>Recibido</td>
+      </tr>
+      {% endfor %}
+      {% if reserva.saldo_pendiente > 0 %}
+      <tr>
+        <td>Saldo por liquidar (antes del evento)</td>
+        <td>${{ reserva.saldo_pendiente|floatformat:0 }}</td>
+        <td>Pendiente</td>
+      </tr>
+      {% endif %}
+    </tbody>
+  </table>
+  <p>El anticipo del 25% garantiza la reserva de la fecha. El saldo deberá liquidarse a más tardar <strong>15 días antes</strong> de la fecha del evento.</p>
+
+  <!-- Cláusulas -->
+  <h2>V. Términos y Condiciones</h2>
+  <ol>
+    <li><strong>Reserva y anticipo.</strong> El pago del anticipo confirma la reserva de la fecha y el espacio indicados. La fecha quedará bloqueada exclusivamente para el presente contrato.</li>
+    <li><strong>Cancelación por el cliente.</strong> Si el Cliente cancela con más de 30 días de anticipación, se reembolsará el 50% del anticipo. Con menos de 30 días, el anticipo no es reembolsable.</li>
+    <li><strong>Cancelación por causas de fuerza mayor.</strong> En caso de cancelación por causas ajenas a ambas partes, El Complejo ofrecerá una fecha alternativa sin costo adicional.</li>
+    <li><strong>Capacidad máxima.</strong> El número de invitados no podrá exceder la capacidad máxima del espacio ({{ reserva.espacio.capacidad_max }} personas) por razones de seguridad.</li>
+    <li><strong>Responsabilidad del cliente.</strong> El Cliente asume responsabilidad por el buen uso de las instalaciones. Los daños materiales ocasionados serán cubiertos por El Cliente.</li>
+    <li><strong>Horario del evento.</strong> El evento deberá iniciar a la hora contratada y concluir dentro del período de {{ reserva.paquete.duracion_horas }} horas del paquete. Tiempo adicional genera cargos extra.</li>
+    <li><strong>Servicios de terceros.</strong> Los servicios adicionales contratados serán coordinados por El Complejo con proveedores autorizados.</li>
+    <li><strong>Modificaciones.</strong> Cualquier cambio en los servicios contratados deberá solicitarse con al menos 30 días de anticipación y estará sujeto a disponibilidad.</li>
+  </ol>
+
+  <!-- Protección de datos -->
+  <h2>VI. Protección de Datos Personales</h2>
+  <p>Los datos personales del Cliente serán utilizados exclusivamente para la gestión del presente contrato y la prestación de los servicios contratados, conforme a la Ley Federal de Protección de Datos Personales en Posesión de los Particulares.</p>
+
+  <!-- Firmas -->
+  <div class="firmas">
+    <div class="firma-box">
+      <br><br><br>
+      <div class="firma-linea"></div>
+      <div class="firma-nombre">{{ reserva.cliente.get_full_name }}</div>
+      <div class="firma-rol">El Cliente</div>
+      <div class="firma-rol">{{ reserva.cliente.email }}</div>
+    </div>
+    <div class="firma-box">
+      <br><br><br>
+      <div class="firma-linea"></div>
+      <div class="firma-nombre">Complejo Riviera Maya S.A. de C.V.</div>
+      <div class="firma-rol">El Prestador de Servicios</div>
+      {% if reserva.coordinador %}<div class="firma-rol">Coordinador: {{ reserva.coordinador.get_full_name }}</div>{% endif %}
+    </div>
+  </div>
+
+  <!-- Pie del documento -->
+  <div class="footer-doc">
+    <p>Contrato generado electrónicamente · Folio {{ reserva.codigo }} · Fecha de generación: {% now "d \d\e F \d\e Y" %}</p>
+    <p>Complejo Riviera Maya — Este documento tiene validez como comprobante de la reserva y sus condiciones.</p>
+  </div>
+</div>
+
+</body>
+</html>
